@@ -40,9 +40,10 @@ The application already has fully functional viewing capabilities (list and deta
 
 3. **Set up environment variables:**
    ```bash
-   cp .env.example .env
+   cp .env.example .env.dev
    ```
-   Edit `.env` and fill in the required values (provided during the session).
+   The `.env.dev` file is already configured with development environment values matching `rise-mobile-app`. 
+   The app loads `.env.dev` by default (development environment).
 
 4. **Run code generation:**
    ```bash
@@ -161,10 +162,20 @@ lib/
 - Changes should be reflected in the detail view
 - Show a success message after successful update
 
+## Environment Configuration
+
+This exercise uses the **development environment** setup, matching the configuration from `rise-mobile-app`:
+- **Environment:** Development (`ENVIRONMENT=dev`)
+- **API Base URL:** Development API endpoint
+- **Cognito:** Development user pool and client ID
+- **Region:** `eu-central-1`
+
+The configuration is loaded from `.env.dev` file by default, following the same pattern as `rise-mobile-app`'s `main_dev.dart`.
+
 ## API Endpoints Reference
 
 ### Base URL
-The base URL is configured in `.env` file as `API_BASE_URL`.
+The base URL is configured in `.env.dev` file as `API_BASE_URL` (development environment).
 
 ### Authentication
 All API calls require authentication via Bearer token (handled automatically by `AuthInterceptor`).

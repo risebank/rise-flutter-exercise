@@ -41,8 +41,30 @@ class ApiClient {
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
+      String errorMessage = 'Request failed';
+      
+      if (e.response != null) {
+        final responseData = e.response!.data;
+        
+        // Handle different error response formats
+        if (responseData is Map<String, dynamic>) {
+          // Try 'error' field first (common in API responses)
+          errorMessage = responseData['error'] as String? ?? 
+                        responseData['message'] as String? ?? 
+                        responseData['debug'] as String? ??
+                        e.message ?? 
+                        'Request failed';
+        } else if (responseData is String) {
+          errorMessage = responseData;
+        } else {
+          errorMessage = e.message ?? 'Request failed';
+        }
+      } else {
+        errorMessage = e.message ?? 'Request failed';
+      }
+      
       return ApiResponse.error(
-        e.response?.data?['message'] ?? e.message ?? 'Request failed',
+        errorMessage,
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -66,8 +88,28 @@ class ApiClient {
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
+      String errorMessage = 'Request failed';
+      
+      if (e.response != null) {
+        final responseData = e.response!.data;
+        
+        if (responseData is Map<String, dynamic>) {
+          errorMessage = responseData['error'] as String? ?? 
+                        responseData['message'] as String? ?? 
+                        responseData['debug'] as String? ??
+                        e.message ?? 
+                        'Request failed';
+        } else if (responseData is String) {
+          errorMessage = responseData;
+        } else {
+          errorMessage = e.message ?? 'Request failed';
+        }
+      } else {
+        errorMessage = e.message ?? 'Request failed';
+      }
+      
       return ApiResponse.error(
-        e.response?.data?['message'] ?? e.message ?? 'Request failed',
+        errorMessage,
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -91,8 +133,28 @@ class ApiClient {
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
+      String errorMessage = 'Request failed';
+      
+      if (e.response != null) {
+        final responseData = e.response!.data;
+        
+        if (responseData is Map<String, dynamic>) {
+          errorMessage = responseData['error'] as String? ?? 
+                        responseData['message'] as String? ?? 
+                        responseData['debug'] as String? ??
+                        e.message ?? 
+                        'Request failed';
+        } else if (responseData is String) {
+          errorMessage = responseData;
+        } else {
+          errorMessage = e.message ?? 'Request failed';
+        }
+      } else {
+        errorMessage = e.message ?? 'Request failed';
+      }
+      
       return ApiResponse.error(
-        e.response?.data?['message'] ?? e.message ?? 'Request failed',
+        errorMessage,
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -112,8 +174,29 @@ class ApiClient {
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
+      String errorMessage = 'Request failed';
+      
+      if (e.response != null) {
+        final responseData = e.response!.data;
+        
+        // Handle different error response formats
+        if (responseData is Map<String, dynamic>) {
+          errorMessage = responseData['error'] as String? ?? 
+                        responseData['message'] as String? ?? 
+                        responseData['debug'] as String? ??
+                        e.message ?? 
+                        'Request failed';
+        } else if (responseData is String) {
+          errorMessage = responseData;
+        } else {
+          errorMessage = e.message ?? 'Request failed';
+        }
+      } else {
+        errorMessage = e.message ?? 'Request failed';
+      }
+      
       return ApiResponse.error(
-        e.response?.data?['message'] ?? e.message ?? 'Request failed',
+        errorMessage,
         statusCode: e.response?.statusCode,
       );
     } catch (e) {

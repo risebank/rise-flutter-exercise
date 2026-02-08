@@ -28,31 +28,41 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
     // Get company ID from WhoAmI service
     final authService = AuthService();
     
-    // Always fetch WhoAmI to ensure we have the latest data
-    // The cache might not be populated yet if login just completed
-    final whoAmIResponse = await authService.whoAmI(context);
+    // First check cache (should be populated during login)
+    _companyId = authService.getCurrentCompanyId();
     
-    if (whoAmIResponse.success && whoAmIResponse.data != null) {
-      _companyId = whoAmIResponse.data!.companyId;
-    } else {
-      // If WhoAmI fails, try cache as fallback
-      _companyId = authService.getCurrentCompanyId();
+    // If not in cache, fetch WhoAmI
+    if (_companyId == null || _companyId!.isEmpty) {
+      final whoAmIResponse = await authService.whoAmI(context);
+      
+      if (whoAmIResponse.success && whoAmIResponse.data != null) {
+        _companyId = whoAmIResponse.data!.companyId;
+      } else {
+        // Log the error for debugging
+        debugPrint('Failed to fetch WhoAmI: ${whoAmIResponse.message}');
+        debugPrint('WhoAmI response status: ${whoAmIResponse.statusCode}');
+      }
     }
     
-    // Fallback to instructions value if still null (for exercise setup)
-    // This should only happen if WhoAmI endpoint fails and cache is empty
-    _companyId ??= 'company-123'; // From INSTRUCTIONS.md
+    // Validate company ID before making API call
+    if (_companyId == null || _companyId!.isEmpty) {
+      debugPrint('ERROR: Company ID is null or empty. Cannot fetch sales invoices.');
+      if (mounted) {
+        // Don't use fallback - show proper error instead
+        setState(() {
+          // Error will be shown by provider state
+        });
+      }
+      return;
+    }
     
-    if (_companyId != null && _companyId!.isNotEmpty && mounted) {
+    debugPrint('Using company ID: $_companyId');
+    
+    if (mounted) {
       ref.read(salesInvoicesProvider.notifier).fetchSalesInvoices(
         context,
         _companyId!,
       );
-    } else if (mounted) {
-      // Show error if we couldn't get company ID
-      setState(() {
-        // The error will be shown by the provider state
-      });
     }
   }
 

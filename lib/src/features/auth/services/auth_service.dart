@@ -100,13 +100,35 @@ class AuthService {
         // Parse WhoAmI model from the response data
         final whoAmI = WhoAmIModel.fromJson(response.data!);
         
+        // Validate that we have permissions with company IDs
+        if (whoAmI.permissions.isEmpty) {
+          safePrint('WARNING: WhoAmI response has no permissions');
+          return ApiResponse.error(
+            'User has no company permissions',
+            statusCode: response.statusCode,
+          );
+        }
+        
+        final companyId = whoAmI.companyId;
+        if (companyId == null || companyId.isEmpty) {
+          safePrint('WARNING: Could not extract company ID from WhoAmI');
+          safePrint('Permissions: ${whoAmI.permissions}');
+          return ApiResponse.error(
+            'Could not determine company ID',
+            statusCode: response.statusCode,
+          );
+        }
+        
         // Cache the WhoAmI data for future use
         _cachedWhoAmI = whoAmI;
+        safePrint('WhoAmI cached successfully. Company ID: $companyId');
+        safePrint('User: ${whoAmI.user.email}, Permissions count: ${whoAmI.permissions.length}');
         
         return ApiResponse.success(whoAmI, statusCode: response.statusCode);
       } catch (e) {
         safePrint('Failed to parse WhoAmI response: $e');
         safePrint('Response data: ${response.data}');
+        safePrint('Response data type: ${response.data.runtimeType}');
         return ApiResponse.error(
           'Failed to parse user information: ${e.toString()}',
           statusCode: response.statusCode,

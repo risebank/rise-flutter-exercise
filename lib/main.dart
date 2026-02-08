@@ -20,59 +20,65 @@ void main([List<String>? args, String? envFile]) async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-final _router = GoRouter(
-  initialLocation: '/login',
-  routes: [
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/sales-invoices',
-      builder: (context, state) => const SalesInvoicesListScreen(),
-    ),
-    GoRoute(
-      path: '/sales-invoices/:invoiceId',
-      builder: (context, state) {
-        final invoiceId = state.pathParameters['invoiceId']!;
-        return SalesInvoiceDetailScreen(invoiceId: invoiceId);
-      },
-    ),
-  ],
-  redirect: (context, state) {
-    final authState = ProviderScope.containerOf(context).read(authProvider);
-    
-    // Check if user is logged in (state has data and value is not null)
-    final isLoggedIn = authState.hasValue && authState.value != null;
-    final isGoingToLogin = state.matchedLocation == '/login';
+final goRouterProvider = Provider<GoRouter>((ref) {
+  // Watch auth state to rebuild router when auth changes
+  final authState = ref.watch(authProvider);
+  
+  return GoRouter(
+    initialLocation: '/login',
+    routes: [
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/sales-invoices',
+        builder: (context, state) => const SalesInvoicesListScreen(),
+      ),
+      GoRoute(
+        path: '/sales-invoices/:invoiceId',
+        builder: (context, state) {
+          final invoiceId = state.pathParameters['invoiceId']!;
+          return SalesInvoiceDetailScreen(invoiceId: invoiceId);
+        },
+      ),
+    ],
+    redirect: (context, state) async {
+      // Use the notifier's isUserSignedIn method for accurate auth state
+      final authNotifier = ref.read(authProvider.notifier);
+      final isSignedIn = await authNotifier.isUserSignedIn();
+      final isGoingToLogin = state.matchedLocation == '/login';
 
-    // Redirect to login if not authenticated and not already going to login
-    if (!isLoggedIn && !isGoingToLogin) {
-      return '/login';
-    }
-    
-    // Redirect to sales invoices if authenticated and trying to access login
-    if (isLoggedIn && isGoingToLogin) {
-      return '/sales-invoices';
-    }
-    
-    // Allow navigation to proceed
-    return null;
-  },
-);
+      // Redirect to login if not authenticated and not already going to login
+      if (!isSignedIn && !isGoingToLogin) {
+        return '/login';
+      }
+      
+      // Redirect to sales invoices if authenticated and trying to access login
+      if (isSignedIn && isGoingToLogin) {
+        return '/sales-invoices';
+      }
+      
+      // Allow navigation to proceed
+      return null;
+    },
+  );
+});
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(goRouterProvider);
+    
     return MaterialApp.router(
       title: 'Rise Flutter Exercise',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      routerConfig: _router,
+      routerConfig: router,
     );
   }
 }

@@ -44,7 +44,7 @@ class Auth extends _$Auth {
           // via _fetchAndSaveWhoAmI(), so we don't need to fetch it again here
           // Just verify it's cached
           final companyId = _service.getCurrentCompanyId();
-          if (companyId == null) {
+          if (companyId == null || companyId.isEmpty) {
             // If not cached, fetch it now
             if (context.mounted) {
               final whoAmIResponse = await _service.whoAmI(context);
@@ -58,8 +58,12 @@ class Auth extends _$Auth {
             }
           }
           
-          // Update auth state - navigation will be handled by router redirect
+          // Update auth state - this will trigger router rebuild and redirect
           state = AsyncValue.data(user);
+          
+          // Small delay to ensure state is propagated before navigation
+          // The router will handle navigation via redirect logic
+          await Future.delayed(const Duration(milliseconds: 100));
         } else {
           state = AsyncValue.error(
             'Failed to retrieve user information after login',
@@ -91,6 +95,18 @@ class Auth extends _$Auth {
   void clearError() {
     if (state.hasError) {
       state = AsyncValue.data(state.value);
+    }
+  }
+
+  /// Check if user is currently signed in
+  /// This checks both the auth state and Amplify session
+  Future<bool> isUserSignedIn() async {
+    try {
+      final amplifySignedIn = await _service.isUserSignedIn();
+      final stateHasUser = state.hasValue && state.value != null;
+      return amplifySignedIn && stateHasUser;
+    } catch (e) {
+      return false;
     }
   }
 }

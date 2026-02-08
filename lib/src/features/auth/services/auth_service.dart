@@ -45,6 +45,11 @@ class AuthService {
   Future<ApiResponse<SignOutResult>> logout(BuildContext context) async {
     try {
       final result = await Amplify.Auth.signOut();
+      
+      // Clear cached WhoAmI data on logout
+      _cachedWhoAmI = null;
+      safePrint('WhoAmI cache cleared on logout');
+      
       return ApiResponse.success(result);
     } catch (e) {
       final errorMessage = _parseAmplifyError(context, e);
@@ -109,6 +114,10 @@ class AuthService {
       
       try {
         // Parse WhoAmI model from the response data
+        // The API returns: { user: {...}, permissions: [...] }
+        safePrint('Parsing WhoAmI response...');
+        safePrint('Response data structure: ${response.data!.keys}');
+        
         final whoAmI = WhoAmIModel.fromJson(response.data!);
         
         // Validate that we have permissions with company IDs
@@ -125,7 +134,10 @@ class AuthService {
         if (companyId == null || companyId.isEmpty) {
           safePrint('WARNING: Could not extract company ID from WhoAmI');
           safePrint('Permissions: ${whoAmI.permissions}');
-          safePrint('First permission: ${whoAmI.permissions.first.toJson()}');
+          if (whoAmI.permissions.isNotEmpty) {
+            safePrint('First permission: ${whoAmI.permissions.first.toJson()}');
+            safePrint('First permission company_id: ${whoAmI.permissions.first.companyId}');
+          }
           return ApiResponse.error(
             'Could not determine company ID',
             statusCode: response.statusCode,
@@ -134,7 +146,7 @@ class AuthService {
         
         // Cache the WhoAmI data for future use
         _cachedWhoAmI = whoAmI;
-        safePrint('WhoAmI cached successfully. Company ID: $companyId');
+        safePrint('✅ WhoAmI cached successfully. Company ID: $companyId');
         safePrint('User: ${whoAmI.user.email}, Permissions count: ${whoAmI.permissions.length}');
         
         return ApiResponse.success(whoAmI, statusCode: response.statusCode);

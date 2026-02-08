@@ -17,7 +17,16 @@ class Auth extends _$Auth {
     _service = AuthService();
     // Just return getCurrentUser() - it will return null if not signed in
     // This matches rise-mobile-app's pattern and ensures auth state persists on page reload
-    return await _service.getCurrentUser();
+    safePrint('🔍 [AuthProvider] Initializing auth state...');
+    final user = await _service.getCurrentUser();
+    if (user != null) {
+      safePrint('✅ [AuthProvider] User found on initialization: ${user.userId}');
+      // Fetch WhoAmI to ensure company ID is available
+      // Note: We can't use context here, so we'll fetch it when needed
+    } else {
+      safePrint('ℹ️ [AuthProvider] No user found on initialization');
+    }
+    return user;
   }
 
   Future<void> login(BuildContext context) async {
@@ -102,8 +111,11 @@ class Auth extends _$Auth {
     try {
       // Check Amplify session directly - don't rely on provider state
       // This ensures it works correctly on page reload when provider state might not be initialized yet
-      return await _service.isUserSignedIn();
+      final isSignedIn = await _service.isUserSignedIn();
+      safePrint('🔍 [AuthProvider.isUserSignedIn] Result: $isSignedIn');
+      return isSignedIn;
     } catch (e) {
+      safePrint('❌ [AuthProvider.isUserSignedIn] Error: $e');
       return false;
     }
   }

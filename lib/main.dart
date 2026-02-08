@@ -47,8 +47,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Wait for auth state to initialize (important for page reload)
       final authState = ref.read(authProvider);
       
+      debugPrint('🔍 [Router] Redirect check - Auth state: isLoading=${authState.isLoading}, hasValue=${authState.hasValue}, hasError=${authState.hasError}');
+      debugPrint('🔍 [Router] Current location: ${state.matchedLocation}');
+      
       // If auth state is still loading, wait a bit and allow current navigation
       if (authState.isLoading) {
+        debugPrint('⏳ [Router] Auth state is loading, allowing current navigation');
         return null; // Don't redirect while loading
       }
       
@@ -57,18 +61,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final authNotifier = ref.read(authProvider.notifier);
       final isSignedIn = await authNotifier.isUserSignedIn();
       final isGoingToLogin = state.matchedLocation == '/login';
+      
+      debugPrint('🔍 [Router] Is signed in: $isSignedIn, Going to login: $isGoingToLogin');
 
       // Redirect to login if not authenticated and not already going to login
       if (!isSignedIn && !isGoingToLogin) {
+        debugPrint('➡️ [Router] Redirecting to /login (not authenticated)');
         return '/login';
       }
       
       // Redirect to sales invoices if authenticated and trying to access login
       if (isSignedIn && isGoingToLogin) {
+        debugPrint('➡️ [Router] Redirecting to /sales-invoices (authenticated, trying to access login)');
         return '/sales-invoices';
       }
       
       // Allow navigation to proceed
+      debugPrint('✅ [Router] Allowing navigation to proceed');
       return null;
     },
   );

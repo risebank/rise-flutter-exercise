@@ -40,17 +40,26 @@ class Auth extends _$Auth {
         final user = await _service.getCurrentUser();
         
         if (user != null) {
-          // Update auth state first
-          state = AsyncValue.data(user);
-          
-          // Ensure WhoAmI is fetched and cached before navigation
-          // This ensures company ID is available for subsequent API calls
-          if (context.mounted) {
-            await _service.whoAmI(context);
+          // WhoAmI is already fetched and cached in AuthService.login()
+          // via _fetchAndSaveWhoAmI(), so we don't need to fetch it again here
+          // Just verify it's cached
+          final companyId = _service.getCurrentCompanyId();
+          if (companyId == null) {
+            // If not cached, fetch it now
+            if (context.mounted) {
+              final whoAmIResponse = await _service.whoAmI(context);
+              if (!whoAmIResponse.success) {
+                state = AsyncValue.error(
+                  'Failed to fetch user company information: ${whoAmIResponse.message}',
+                  StackTrace.current,
+                );
+                return;
+              }
+            }
           }
           
-          // Navigation will be handled by router redirect logic
-          // based on the updated auth state
+          // Update auth state - navigation will be handled by router redirect
+          state = AsyncValue.data(user);
         } else {
           state = AsyncValue.error(
             'Failed to retrieve user information after login',

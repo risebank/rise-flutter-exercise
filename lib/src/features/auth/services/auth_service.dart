@@ -73,8 +73,15 @@ class AuthService {
       return ApiResponse.error(ErrorMessages.authError(context));
     }
 
+    // Check cache first - if we have valid cached data, return it
+    if (_cachedWhoAmI != null && _cachedWhoAmI!.companyId != null) {
+      safePrint('Using cached WhoAmI data. Company ID: ${_cachedWhoAmI!.companyId}');
+      return ApiResponse.success(_cachedWhoAmI!);
+    }
+
     try {
       // The /me endpoint returns data directly: { user: {...}, permissions: [...] }
+      safePrint('Fetching WhoAmI from API...');
       final response = await _apiClient.get<Map<String, dynamic>>(
         Endpoints.whoami,
         context: context,
@@ -82,6 +89,7 @@ class AuthService {
       
       // Check if API call was successful
       if (!response.success) {
+        safePrint('WhoAmI API call failed: ${response.message}');
         return ApiResponse.error(
           response.message ?? ErrorMessages.fetchError(context, 'user info'),
           statusCode: response.statusCode,
@@ -90,11 +98,14 @@ class AuthService {
       
       // Parse the response data directly (backend returns data, not wrapped)
       if (response.data == null) {
+        safePrint('WhoAmI API returned null data');
         return ApiResponse.error(
           ErrorMessages.fetchError(context, 'user info'),
           statusCode: response.statusCode,
         );
       }
+      
+      safePrint('WhoAmI API response received. Data keys: ${response.data!.keys}');
       
       try {
         // Parse WhoAmI model from the response data
@@ -103,6 +114,7 @@ class AuthService {
         // Validate that we have permissions with company IDs
         if (whoAmI.permissions.isEmpty) {
           safePrint('WARNING: WhoAmI response has no permissions');
+          safePrint('Response data: ${response.data}');
           return ApiResponse.error(
             'User has no company permissions',
             statusCode: response.statusCode,
@@ -113,6 +125,7 @@ class AuthService {
         if (companyId == null || companyId.isEmpty) {
           safePrint('WARNING: Could not extract company ID from WhoAmI');
           safePrint('Permissions: ${whoAmI.permissions}');
+          safePrint('First permission: ${whoAmI.permissions.first.toJson()}');
           return ApiResponse.error(
             'Could not determine company ID',
             statusCode: response.statusCode,
@@ -125,8 +138,9 @@ class AuthService {
         safePrint('User: ${whoAmI.user.email}, Permissions count: ${whoAmI.permissions.length}');
         
         return ApiResponse.success(whoAmI, statusCode: response.statusCode);
-      } catch (e) {
+      } catch (e, stackTrace) {
         safePrint('Failed to parse WhoAmI response: $e');
+        safePrint('Stack trace: $stackTrace');
         safePrint('Response data: ${response.data}');
         safePrint('Response data type: ${response.data.runtimeType}');
         return ApiResponse.error(
@@ -134,8 +148,9 @@ class AuthService {
           statusCode: response.statusCode,
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       safePrint('WhoAmI request failed: $e');
+      safePrint('Stack trace: $stackTrace');
       return ApiResponse.error(
         ErrorMessages.fetchError(context, 'user info'),
       );

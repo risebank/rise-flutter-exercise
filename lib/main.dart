@@ -41,15 +41,22 @@ final _router = GoRouter(
   ],
   redirect: (context, state) {
     final authState = ProviderScope.containerOf(context).read(authProvider);
+    
+    // Check if user is logged in (state has data and value is not null)
     final isLoggedIn = authState.hasValue && authState.value != null;
     final isGoingToLogin = state.matchedLocation == '/login';
 
+    // Redirect to login if not authenticated and not already going to login
     if (!isLoggedIn && !isGoingToLogin) {
       return '/login';
     }
+    
+    // Redirect to sales invoices if authenticated and trying to access login
     if (isLoggedIn && isGoingToLogin) {
       return '/sales-invoices';
     }
+    
+    // Allow navigation to proceed
     return null;
   },
 );

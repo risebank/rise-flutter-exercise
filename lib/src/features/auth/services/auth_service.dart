@@ -20,11 +20,19 @@ class AuthService {
         password: password,
       );
 
+      // Handle different sign-in steps
       if (result.nextStep.signInStep == AuthSignInStep.done) {
-        // Fetch user info after successful login
+        // Login is complete - fetch WhoAmI data immediately
+        // This ensures company ID is available for subsequent API calls
         if (context.mounted) {
           await _fetchAndSaveWhoAmI(context);
         }
+      } else {
+        // Handle other sign-in steps (MFA, password reset, etc.)
+        // For this exercise, we only support simple login
+        return ApiResponse.error(
+          'Additional authentication steps required. This exercise only supports simple login.',
+        );
       }
 
       return ApiResponse.success(result);
@@ -65,40 +73,51 @@ class AuthService {
       return ApiResponse.error(ErrorMessages.authError(context));
     }
 
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      Endpoints.whoami,
-      context: context,
-    );
-    
-    // Parse the response using the standard pattern
-    // The response.data is the raw data from the API
-    final parsedResponse = ApiResponse.fromApiClientResponse(
-      context,
-      response.data, // Pass the raw data, not the ApiResponse wrapper
-      parser: (json) {
-        // Handle both direct data and wrapped responses
-        if (json is Map<String, dynamic>) {
-          return WhoAmIModel.fromJson(json);
-        }
-        throw Exception('Unexpected response format: ${json.runtimeType}');
-      },
-      errorMessage: ErrorMessages.fetchError(context, 'user info'),
-    );
-    
-    // If the response was not successful, use the error from the original response
-    if (!response.success) {
+    try {
+      // The /me endpoint returns data directly: { user: {...}, permissions: [...] }
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        Endpoints.whoami,
+        context: context,
+      );
+      
+      // Check if API call was successful
+      if (!response.success) {
+        return ApiResponse.error(
+          response.message ?? ErrorMessages.fetchError(context, 'user info'),
+          statusCode: response.statusCode,
+        );
+      }
+      
+      // Parse the response data directly (backend returns data, not wrapped)
+      if (response.data == null) {
+        return ApiResponse.error(
+          ErrorMessages.fetchError(context, 'user info'),
+          statusCode: response.statusCode,
+        );
+      }
+      
+      try {
+        // Parse WhoAmI model from the response data
+        final whoAmI = WhoAmIModel.fromJson(response.data!);
+        
+        // Cache the WhoAmI data for future use
+        _cachedWhoAmI = whoAmI;
+        
+        return ApiResponse.success(whoAmI, statusCode: response.statusCode);
+      } catch (e) {
+        safePrint('Failed to parse WhoAmI response: $e');
+        safePrint('Response data: ${response.data}');
+        return ApiResponse.error(
+          'Failed to parse user information: ${e.toString()}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      safePrint('WhoAmI request failed: $e');
       return ApiResponse.error(
-        response.message ?? ErrorMessages.fetchError(context, 'user info'),
-        statusCode: response.statusCode,
+        ErrorMessages.fetchError(context, 'user info'),
       );
     }
-    
-    // Cache the WhoAmI data if successful
-    if (parsedResponse.success && parsedResponse.data != null) {
-      _cachedWhoAmI = parsedResponse.data;
-    }
-    
-    return parsedResponse;
   }
 
   Future<void> _fetchAndSaveWhoAmI(BuildContext context) async {
@@ -108,9 +127,13 @@ class AuthService {
         // Store user info - for exercise, we'll use a simple in-memory cache
         // In production app, this would use Hive or shared preferences
         _cachedWhoAmI = whoAmIResponse.data;
+        safePrint('WhoAmI data cached successfully. Company ID: ${_cachedWhoAmI?.companyId}');
+      } else {
+        safePrint('Failed to fetch WhoAmI: ${whoAmIResponse.message}');
       }
     } catch (e) {
       safePrint('Failed to fetch and save WhoAmI data: $e');
+      rethrow; // Re-throw to allow caller to handle the error
     }
   }
 

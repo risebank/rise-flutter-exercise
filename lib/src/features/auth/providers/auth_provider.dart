@@ -22,7 +22,10 @@ class Auth extends _$Auth {
     return null;
   }
 
-  Future<bool> login(BuildContext context) async {
+  Future<void> login(BuildContext context) async {
+    // Prevent multiple simultaneous login attempts
+    if (state.isLoading) return;
+    
     state = const AsyncValue.loading();
     
     try {
@@ -33,18 +36,38 @@ class Auth extends _$Auth {
       );
 
       if (result.success) {
+        // Wait for user to be available before updating state
         final user = await _service.getCurrentUser();
-        state = AsyncValue.data(user);
-        // Refresh whoAmI after successful login
-        ref.invalidate(whoAmIProvider);
-        return true;
+        
+        if (user != null) {
+          // Update auth state first
+          state = AsyncValue.data(user);
+          
+          // Ensure WhoAmI is fetched and cached before navigation
+          // This ensures company ID is available for subsequent API calls
+          if (context.mounted) {
+            await _service.whoAmI(context);
+          }
+          
+          // Navigation will be handled by router redirect logic
+          // based on the updated auth state
+        } else {
+          state = AsyncValue.error(
+            'Failed to retrieve user information after login',
+            StackTrace.current,
+          );
+        }
       } else {
-        state = AsyncValue.error(result.message ?? 'Login failed', StackTrace.current);
-        return false;
+        state = AsyncValue.error(
+          result.message ?? 'Login failed',
+          StackTrace.current,
+        );
       }
     } catch (e, stackTrace) {
-      state = AsyncValue.error(e.toString(), stackTrace);
-      return false;
+      state = AsyncValue.error(
+        e.toString(),
+        stackTrace,
+      );
     }
   }
 

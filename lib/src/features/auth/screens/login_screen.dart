@@ -67,11 +67,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    final success = await authNotifier.login(context);
-                    if (success && context.mounted) {
-                      // Navigate to sales invoices screen after successful login
-                      context.go('/sales-invoices');
-                    }
+                    // Login method handles state updates and navigation via router
+                    await authNotifier.login(context);
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -115,10 +112,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         authNotifier.clearError();
-                        final success = await authNotifier.login(context);
-                        if (success && context.mounted) {
-                          context.go('/sales-invoices');
-                        }
+                        // Login method handles state updates and navigation via router
+                        await authNotifier.login(context);
                       },
                       child: const Text('Try Again'),
                     ),

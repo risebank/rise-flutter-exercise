@@ -65,13 +65,40 @@ class AuthService {
       return ApiResponse.error(ErrorMessages.authError(context));
     }
 
-    final response = await _apiClient.get(Endpoints.whoami, context: context);
-    return ApiResponse.fromApiClientResponse(
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      Endpoints.whoami,
+      context: context,
+    );
+    
+    // Parse the response using the standard pattern
+    // The response.data is the raw data from the API
+    final parsedResponse = ApiResponse.fromApiClientResponse(
       context,
-      response,
-      parser: (json) => WhoAmIModel.fromJson(json as Map<String, dynamic>),
+      response.data, // Pass the raw data, not the ApiResponse wrapper
+      parser: (json) {
+        // Handle both direct data and wrapped responses
+        if (json is Map<String, dynamic>) {
+          return WhoAmIModel.fromJson(json);
+        }
+        throw Exception('Unexpected response format: ${json.runtimeType}');
+      },
       errorMessage: ErrorMessages.fetchError(context, 'user info'),
     );
+    
+    // If the response was not successful, use the error from the original response
+    if (!response.success) {
+      return ApiResponse.error(
+        response.message ?? ErrorMessages.fetchError(context, 'user info'),
+        statusCode: response.statusCode,
+      );
+    }
+    
+    // Cache the WhoAmI data if successful
+    if (parsedResponse.success && parsedResponse.data != null) {
+      _cachedWhoAmI = parsedResponse.data;
+    }
+    
+    return parsedResponse;
   }
 
   Future<void> _fetchAndSaveWhoAmI(BuildContext context) async {

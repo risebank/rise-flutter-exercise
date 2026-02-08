@@ -28,18 +28,19 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
     // Get company ID from WhoAmI service
     final authService = AuthService();
     
-    // First try to get from cache
-    _companyId = authService.getCurrentCompanyId();
+    // Always fetch WhoAmI to ensure we have the latest data
+    // The cache might not be populated yet if login just completed
+    final whoAmIResponse = await authService.whoAmI(context);
     
-    // If not in cache, fetch WhoAmI
-    if (_companyId == null || _companyId!.isEmpty) {
-      final whoAmIResponse = await authService.whoAmI(context);
-      if (whoAmIResponse.success && whoAmIResponse.data != null) {
-        _companyId = whoAmIResponse.data!.companyId;
-      }
+    if (whoAmIResponse.success && whoAmIResponse.data != null) {
+      _companyId = whoAmIResponse.data!.companyId;
+    } else {
+      // If WhoAmI fails, try cache as fallback
+      _companyId = authService.getCurrentCompanyId();
     }
     
     // Fallback to instructions value if still null (for exercise setup)
+    // This should only happen if WhoAmI endpoint fails and cache is empty
     _companyId ??= 'company-123'; // From INSTRUCTIONS.md
     
     if (_companyId != null && _companyId!.isNotEmpty && mounted) {
@@ -47,6 +48,11 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
         context,
         _companyId!,
       );
+    } else if (mounted) {
+      // Show error if we couldn't get company ID
+      setState(() {
+        // The error will be shown by the provider state
+      });
     }
   }
 

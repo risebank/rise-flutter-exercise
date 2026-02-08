@@ -6,7 +6,7 @@ part of 'auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$whoAmIHash() => r'10fede908c79dda514f12a55d27a73a2dd2688b8';
+String _$whoAmIHash() => r'3a8781b7a0af807de1bd87c82ed8a000b60b167b';
 
 /// See also [whoAmI].
 @ProviderFor(whoAmI)
@@ -23,7 +23,7 @@ final whoAmIProvider = AutoDisposeFutureProvider<WhoAmIModel?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef WhoAmIRef = AutoDisposeFutureProviderRef<WhoAmIModel?>;
-String _$authHash() => r'f5eeb014aa30b666d7127a5a6df4de37a7a6c363';
+String _$authHash() => r'c17b05d256a821da9f7141436b212e636f7d1422';
 
 /// See also [Auth].
 @ProviderFor(Auth)

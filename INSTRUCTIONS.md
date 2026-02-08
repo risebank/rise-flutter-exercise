@@ -16,7 +16,7 @@ The application already has fully functional viewing capabilities (list and deta
 
 **Email:** `test@risebank.com`  
 **Password:** `TestPassword123!`  
-**Company ID:** `company-123` (use this for all API calls)
+**Company ID:** The company ID will be automatically retrieved from the `/me` (whoAmI) endpoint after successful login. The app fetches it from the user's permissions. If the whoAmI endpoint doesn't return a company ID, the app falls back to `company-123` as specified in the instructions.
 
 ## Prerequisites
 

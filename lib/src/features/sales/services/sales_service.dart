@@ -16,7 +16,13 @@ class SalesService {
     int offset = 0,
     int limit = 20,
   }) async {
+    // Log the company ID being used
+    debugPrint('🔍 [SalesService] Fetching sales invoices with companyId: $companyId');
+    debugPrint('🔍 [SalesService] Company ID length: ${companyId.length}');
+    debugPrint('🔍 [SalesService] Company ID type: ${companyId.runtimeType}');
+    
     final endpoint = Endpoints.salesInvoices.replaceAll('{company_id}', companyId);
+    debugPrint('🔍 [SalesService] Full endpoint URL: $endpoint');
     
     final response = await _apiClient.get<Map<String, dynamic>>(
       endpoint,

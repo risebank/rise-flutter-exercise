@@ -131,12 +131,19 @@ class AuthService {
         }
         
         final companyId = whoAmI.companyId;
+        safePrint('🔍 [AuthService] Extracted companyId: $companyId');
+        safePrint('🔍 [AuthService] CompanyId type: ${companyId.runtimeType}');
+        safePrint('🔍 [AuthService] CompanyId length: ${companyId?.length ?? 0}');
+        
         if (companyId == null || companyId.isEmpty) {
-          safePrint('WARNING: Could not extract company ID from WhoAmI');
+          safePrint('❌ WARNING: Could not extract company ID from WhoAmI');
           safePrint('Permissions: ${whoAmI.permissions}');
           if (whoAmI.permissions.isNotEmpty) {
-            safePrint('First permission: ${whoAmI.permissions.first.toJson()}');
-            safePrint('First permission company_id: ${whoAmI.permissions.first.companyId}');
+            final firstPerm = whoAmI.permissions.first;
+            safePrint('First permission: ${firstPerm.toJson()}');
+            safePrint('First permission companyId: ${firstPerm.companyId}');
+            safePrint('First permission companyId type: ${firstPerm.companyId.runtimeType}');
+            safePrint('First permission companyId length: ${firstPerm.companyId.length}');
           }
           return ApiResponse.error(
             'Could not determine company ID',
@@ -147,6 +154,7 @@ class AuthService {
         // Cache the WhoAmI data for future use
         _cachedWhoAmI = whoAmI;
         safePrint('✅ WhoAmI cached successfully. Company ID: $companyId');
+        safePrint('✅ Company ID verification - Length: ${companyId.length}, Value: $companyId');
         safePrint('User: ${whoAmI.user.email}, Permissions count: ${whoAmI.permissions.length}');
         
         return ApiResponse.success(whoAmI, statusCode: response.statusCode);

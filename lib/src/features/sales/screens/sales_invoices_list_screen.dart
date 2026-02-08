@@ -28,25 +28,40 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
     // Get company ID from WhoAmI service
     final authService = AuthService();
     
+    debugPrint('🔍 [SalesInvoicesList] Starting company ID retrieval...');
+    
     // First check cache (should be populated during login)
     _companyId = authService.getCurrentCompanyId();
+    debugPrint('🔍 [SalesInvoicesList] Cached company ID: $_companyId');
     
-    // If not in cache, fetch WhoAmI
-    if (_companyId == null || _companyId!.isEmpty) {
-      final whoAmIResponse = await authService.whoAmI(context);
+    // Always fetch fresh WhoAmI to ensure we have the latest data
+    // This ensures we're using the correct company ID even if cache is stale
+    debugPrint('🔍 [SalesInvoicesList] Fetching fresh WhoAmI data...');
+    final whoAmIResponse = await authService.whoAmI(context);
+    
+    if (whoAmIResponse.success && whoAmIResponse.data != null) {
+      final extractedCompanyId = whoAmIResponse.data!.companyId;
+      debugPrint('🔍 [SalesInvoicesList] WhoAmI fetch successful');
+      debugPrint('🔍 [SalesInvoicesList] Extracted company ID: $extractedCompanyId');
+      debugPrint('🔍 [SalesInvoicesList] Company ID length: ${extractedCompanyId?.length ?? 0}');
+      debugPrint('🔍 [SalesInvoicesList] Company ID type: ${extractedCompanyId.runtimeType}');
       
-      if (whoAmIResponse.success && whoAmIResponse.data != null) {
-        _companyId = whoAmIResponse.data!.companyId;
+      if (extractedCompanyId != null && extractedCompanyId.isNotEmpty) {
+        _companyId = extractedCompanyId;
       } else {
-        // Log the error for debugging
-        debugPrint('Failed to fetch WhoAmI: ${whoAmIResponse.message}');
-        debugPrint('WhoAmI response status: ${whoAmIResponse.statusCode}');
+        debugPrint('❌ [SalesInvoicesList] Extracted company ID is null or empty');
+        debugPrint('❌ [SalesInvoicesList] WhoAmI data: ${whoAmIResponse.data}');
+        debugPrint('❌ [SalesInvoicesList] Permissions: ${whoAmIResponse.data!.permissions}');
       }
+    } else {
+      // Log the error for debugging
+      debugPrint('❌ [SalesInvoicesList] Failed to fetch WhoAmI: ${whoAmIResponse.message}');
+      debugPrint('❌ [SalesInvoicesList] WhoAmI response status: ${whoAmIResponse.statusCode}');
     }
     
     // Validate company ID before making API call
     if (_companyId == null || _companyId!.isEmpty) {
-      debugPrint('ERROR: Company ID is null or empty. Cannot fetch sales invoices.');
+      debugPrint('❌ ERROR: Company ID is null or empty. Cannot fetch sales invoices.');
       if (mounted) {
         // Don't use fallback - show proper error instead
         setState(() {
@@ -56,7 +71,8 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
       return;
     }
     
-    debugPrint('Using company ID: $_companyId');
+    debugPrint('✅ [SalesInvoicesList] Using company ID: $_companyId');
+    debugPrint('✅ [SalesInvoicesList] Company ID verification - Length: ${_companyId!.length}');
     
     if (mounted) {
       ref.read(salesInvoicesProvider.notifier).fetchSalesInvoices(

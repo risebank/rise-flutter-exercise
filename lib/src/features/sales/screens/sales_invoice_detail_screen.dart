@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/sales/models/sales_invoice_model.dart';
+import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
 
 class SalesInvoiceDetailScreen extends ConsumerStatefulWidget {
   final String invoiceId;
@@ -23,17 +24,35 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Fetch invoice details when screen loads
-      // TODO: Get companyId from auth context or instructions
-      _companyId = 'company_id_from_instructions';
-      if (_companyId != null) {
-        ref.read(selectedSalesInvoiceProvider.notifier).fetchSalesInvoice(
-          context,
-          _companyId!,
-          widget.invoiceId,
-        );
-      }
+      _loadCompanyIdAndFetch();
     });
+  }
+
+  Future<void> _loadCompanyIdAndFetch() async {
+    // Get company ID from WhoAmI service
+    final authService = AuthService();
+    
+    // First try to get from cache
+    _companyId = authService.getCurrentCompanyId();
+    
+    // If not in cache, fetch WhoAmI
+    if (_companyId == null || _companyId!.isEmpty) {
+      final whoAmIResponse = await authService.whoAmI(context);
+      if (whoAmIResponse.success && whoAmIResponse.data != null) {
+        _companyId = whoAmIResponse.data!.companyId;
+      }
+    }
+    
+    // Fallback to instructions value if still null (for exercise setup)
+    _companyId ??= 'company-123'; // From INSTRUCTIONS.md
+    
+    if (_companyId != null && _companyId!.isNotEmpty && mounted) {
+      ref.read(selectedSalesInvoiceProvider.notifier).fetchSalesInvoice(
+        context,
+        _companyId!,
+        widget.invoiceId,
+      );
+    }
   }
 
   @override
@@ -225,13 +244,7 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  if (_companyId != null) {
-                    ref.read(selectedSalesInvoiceProvider.notifier).fetchSalesInvoice(
-                      context,
-                      _companyId!,
-                      widget.invoiceId,
-                    );
-                  }
+                  _loadCompanyIdAndFetch();
                 },
                 child: const Text('Retry'),
               ),

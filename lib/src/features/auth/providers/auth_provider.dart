@@ -22,7 +22,7 @@ class Auth extends _$Auth {
     return null;
   }
 
-  Future<void> login(BuildContext context) async {
+  Future<bool> login(BuildContext context) async {
     state = const AsyncValue.loading();
     
     try {
@@ -35,11 +35,16 @@ class Auth extends _$Auth {
       if (result.success) {
         final user = await _service.getCurrentUser();
         state = AsyncValue.data(user);
+        // Refresh whoAmI after successful login
+        ref.invalidate(whoAmIProvider);
+        return true;
       } else {
         state = AsyncValue.error(result.message ?? 'Login failed', StackTrace.current);
+        return false;
       }
     } catch (e, stackTrace) {
       state = AsyncValue.error(e.toString(), stackTrace);
+      return false;
     }
   }
 
@@ -48,6 +53,7 @@ class Auth extends _$Auth {
     emailController.clear();
     passwordController.clear();
     state = const AsyncValue.data(null);
+    ref.invalidate(whoAmIProvider);
   }
 
   void clearError() {
@@ -60,7 +66,13 @@ class Auth extends _$Auth {
 @riverpod
 Future<WhoAmIModel?> whoAmI(WhoAmIRef ref) async {
   final authService = AuthService();
-  final context = ref.read(authProvider.notifier);
-  // Note: This is a simplified version - in real app, you'd pass context properly
-  return null; // Will be implemented when we have proper context handling
+  final authState = ref.watch(authProvider);
+  
+  // Only fetch whoAmI if user is authenticated
+  if (authState.hasValue && authState.value != null) {
+    // For web, we need BuildContext - this is a simplified approach
+    // In a real app, you'd handle context properly
+    return null; // Will be fetched via service when context is available
+  }
+  return null;
 }

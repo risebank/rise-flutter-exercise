@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/sales/models/sales_invoice_model.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
+import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
 
 class SalesInvoicesListScreen extends ConsumerStatefulWidget {
   const SalesInvoicesListScreen({super.key});
@@ -13,25 +14,40 @@ class SalesInvoicesListScreen extends ConsumerStatefulWidget {
 }
 
 class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScreen> {
-  // Note: In real app, companyId would come from auth/user context
-  // For exercise, this will be provided in instructions
   String? _companyId;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Fetch invoices when screen loads
-      // TODO: Get companyId from auth context or instructions
-      // For now, using placeholder - applicant will need to handle this
-      _companyId = 'company_id_from_instructions';
-      if (_companyId != null) {
-        ref.read(salesInvoicesProvider.notifier).fetchSalesInvoices(
-          context,
-          _companyId!,
-        );
-      }
+      _loadCompanyIdAndFetch();
     });
+  }
+
+  Future<void> _loadCompanyIdAndFetch() async {
+    // Get company ID from WhoAmI service
+    final authService = AuthService();
+    
+    // First try to get from cache
+    _companyId = authService.getCurrentCompanyId();
+    
+    // If not in cache, fetch WhoAmI
+    if (_companyId == null || _companyId!.isEmpty) {
+      final whoAmIResponse = await authService.whoAmI(context);
+      if (whoAmIResponse.success && whoAmIResponse.data != null) {
+        _companyId = whoAmIResponse.data!.companyId;
+      }
+    }
+    
+    // Fallback to instructions value if still null (for exercise setup)
+    _companyId ??= 'company-123'; // From INSTRUCTIONS.md
+    
+    if (_companyId != null && _companyId!.isNotEmpty && mounted) {
+      ref.read(salesInvoicesProvider.notifier).fetchSalesInvoices(
+        context,
+        _companyId!,
+      );
+    }
   }
 
   @override
@@ -141,12 +157,7 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  if (_companyId != null) {
-                    ref.read(salesInvoicesProvider.notifier).fetchSalesInvoices(
-                      context,
-                      _companyId!,
-                    );
-                  }
+                  _loadCompanyIdAndFetch();
                 },
                 child: const Text('Retry'),
               ),

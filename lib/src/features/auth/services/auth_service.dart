@@ -78,12 +78,22 @@ class AuthService {
     try {
       final whoAmIResponse = await whoAmI(context);
       if (whoAmIResponse.success && whoAmIResponse.data != null) {
-        // Store user info if needed (can use Hive or shared preferences)
-        // For now, we'll just fetch it when needed
+        // Store user info - for exercise, we'll use a simple in-memory cache
+        // In production app, this would use Hive or shared preferences
+        _cachedWhoAmI = whoAmIResponse.data;
       }
     } catch (e) {
       safePrint('Failed to fetch and save WhoAmI data: $e');
     }
+  }
+
+  // Simple in-memory cache for exercise (in production, use Hive)
+  static WhoAmIModel? _cachedWhoAmI;
+
+  WhoAmIModel? get cachedWhoAmI => _cachedWhoAmI;
+
+  String? getCurrentCompanyId() {
+    return _cachedWhoAmI?.companyId;
   }
 
   String _parseAmplifyError(BuildContext context, dynamic error) {

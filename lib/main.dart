@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rise_flutter_exercise/src/features/auth/screens/login_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoices_list_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoice_detail_screen.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
 import 'amplifyconfiguration.dart';
 
-void main() async {
+void main([List<String>? args, String? envFile]) async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Load environment file (defaults to .env.dev for development)
+  await dotenv.load(fileName: envFile ?? '.env.dev');
+
   // Initialize Amplify
   await configureAmplify();
-  
+
   runApp(const ProviderScope(child: MyApp()));
 }
 

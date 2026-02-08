@@ -67,8 +67,15 @@ class AuthService {
   }
 
   Future<bool> isUserSignedIn() async {
-    final result = await Amplify.Auth.fetchAuthSession();
-    return result.isSignedIn;
+    try {
+      final result = await Amplify.Auth.fetchAuthSession();
+      final isSignedIn = result.isSignedIn;
+      safePrint('🔍 [AuthService.isUserSignedIn] Session check: $isSignedIn');
+      return isSignedIn;
+    } catch (e) {
+      safePrint('❌ [AuthService.isUserSignedIn] Error: $e');
+      return false;
+    }
   }
 
   Future<ApiResponse<WhoAmIModel>> whoAmI(BuildContext context) async {

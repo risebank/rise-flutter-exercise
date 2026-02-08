@@ -52,3 +52,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
+
+  # Assets for environment files (needed for web platform)
+  assets:
+    - .env.dev

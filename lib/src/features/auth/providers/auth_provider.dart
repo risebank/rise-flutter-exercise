@@ -15,11 +15,9 @@ class Auth extends _$Auth {
   @override
   Future<AuthUser?> build() async {
     _service = AuthService();
-    final isSignedIn = await _service.isUserSignedIn();
-    if (isSignedIn) {
-      return await _service.getCurrentUser();
-    }
-    return null;
+    // Just return getCurrentUser() - it will return null if not signed in
+    // This matches rise-mobile-app's pattern and ensures auth state persists on page reload
+    return await _service.getCurrentUser();
   }
 
   Future<void> login(BuildContext context) async {
@@ -99,12 +97,12 @@ class Auth extends _$Auth {
   }
 
   /// Check if user is currently signed in
-  /// This checks both the auth state and Amplify session
+  /// This checks Amplify session directly (not provider state) to work correctly on page reload
   Future<bool> isUserSignedIn() async {
     try {
-      final amplifySignedIn = await _service.isUserSignedIn();
-      final stateHasUser = state.hasValue && state.value != null;
-      return amplifySignedIn && stateHasUser;
+      // Check Amplify session directly - don't rely on provider state
+      // This ensures it works correctly on page reload when provider state might not be initialized yet
+      return await _service.isUserSignedIn();
     } catch (e) {
       return false;
     }

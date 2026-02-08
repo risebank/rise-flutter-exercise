@@ -44,7 +44,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
     redirect: (context, state) async {
-      // Use the notifier's isUserSignedIn method for accurate auth state
+      // Wait for auth state to initialize (important for page reload)
+      final authState = ref.read(authProvider);
+      
+      // If auth state is still loading, wait a bit and allow current navigation
+      if (authState.isLoading) {
+        return null; // Don't redirect while loading
+      }
+      
+      // Check if user is signed in via Amplify session (not just provider state)
+      // This ensures auth persists on page reload
       final authNotifier = ref.read(authProvider.notifier);
       final isSignedIn = await authNotifier.isUserSignedIn();
       final isGoingToLogin = state.matchedLocation == '/login';

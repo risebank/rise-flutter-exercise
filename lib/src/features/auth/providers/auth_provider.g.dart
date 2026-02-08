@@ -23,7 +23,7 @@ final whoAmIProvider = AutoDisposeFutureProvider<WhoAmIModel?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef WhoAmIRef = AutoDisposeFutureProviderRef<WhoAmIModel?>;
-String _$authHash() => r'7431f9495a25715aa70d4f6534dc26153dd95483';
+String _$authHash() => r'5aca27011fb72c2786d7a8fa2ba077f76e98ece3';
 
 /// See also [Auth].
 @ProviderFor(Auth)

@@ -1,10 +1,10 @@
 # Rise Flutter Exercise
 
-This repository contains a live-coding exercise for candidates applying to lead the development of the `rise-mobile-app`.
+This repository contains a live-coding exercise for Flutter developers.
 
 ## Overview
 
-The `rise-mobile-app` is a mobile application built with Flutter, designed for release on iOS and Android. The app consumes APIs from the `rise` monorepository backend.
+This is a simplified accounting application built with Flutter, designed to assess Flutter development skills, mobile app architecture understanding, API integration capabilities, and code quality practices.
 
 ## Purpose
 
@@ -13,10 +13,11 @@ This exercise is designed to assess:
 - Mobile app architecture understanding
 - API integration capabilities
 - Code quality and best practices
+- UI/UX design decisions
 
 ## Getting Started
 
-Instructions for the exercise will be provided during the live-coding session.
+Please refer to `INSTRUCTIONS.md` for detailed setup instructions and task requirements.
 
 ## Repository Structure
 
@@ -25,11 +26,16 @@ rise-flutter-exercise/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml          # CI/CD pipeline configuration
+├── lib/
+│   └── src/
+│       ├── features/       # Feature modules (auth, sales)
+│       └── globals/        # Shared utilities and services
 ├── test/
 │   └── widget_test.dart    # Test files
 ├── analysis_options.yaml   # Dart analyzer configuration
 ├── pubspec.yaml            # Flutter project dependencies
-└── README.md
+├── README.md               # This file
+└── INSTRUCTIONS.md         # Detailed exercise instructions
 ```
 
 ## CI/CD Pipeline
@@ -50,5 +56,14 @@ All checks must pass before a PR can be merged.
 
 - Flutter SDK (latest stable version)
 - Dart SDK
-- iOS development tools (for iOS builds)
-- Android development tools (for Android builds)
+- IDE of your choice (VS Code, Android Studio, etc.)
+- Git
+
+## Exercise Tasks
+
+The exercise consists of two main tasks:
+
+1. **Task 1**: Implement the feature for creation of a new sales invoice
+2. **Task 2**: Implement the feature for updating existing sales invoices
+
+For detailed requirements and instructions, please see `INSTRUCTIONS.md`.

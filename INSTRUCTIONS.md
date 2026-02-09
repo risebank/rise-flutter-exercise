@@ -7,16 +7,18 @@ Welcome to the Rise Flutter Exercise! This is a live-coding session designed to 
 ## Exercise Goal
 
 You will be implementing two missing features in a simplified accounting application:
-1. **Stage 1**: Create (POST) sales invoices
-2. **Stage 2**: Update (PATCH) sales invoices
+1. **Task 1**: Create (POST) sales invoices
+2. **Task 2**: Update (PATCH) sales invoices
 
 The application already has fully functional viewing capabilities (list and detail views), so you can focus on implementing the create and update functionality.
+
+**Important**: You are responsible for designing and implementing the UI for both tasks. The application provides a design system and theme, but the specific UI/UX choices for the create and update screens are up to you.
 
 ## Test Account Credentials
 
 **Email:** `test@risebank.com`  
 **Password:** `TestPassword123!`  
-**Company ID:** The company ID will be automatically retrieved from the `/me` (whoAmI) endpoint after successful login. The app fetches it from the user's permissions. If the whoAmI endpoint doesn't return a company ID, the app falls back to `company-123` as specified in the instructions.
+**Company ID:** The company ID will be automatically retrieved from the `/me` (whoAmI) endpoint after successful login. The app fetches it from the user's permissions.
 
 ## Prerequisites
 
@@ -29,7 +31,7 @@ The application already has fully functional viewing capabilities (list and deta
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/risebank/rise-flutter-exercise.git
+   git clone <repository-url>
    cd rise-flutter-exercise
    ```
 
@@ -42,8 +44,7 @@ The application already has fully functional viewing capabilities (list and deta
    ```bash
    cp .env.example .env.dev
    ```
-   The `.env.dev` file is already configured with development environment values matching `rise-mobile-app`. 
-   The app loads `.env.dev` by default (development environment).
+   The `.env.dev` file is already configured with development environment values. The app loads `.env.dev` by default.
 
 4. **Run code generation:**
    ```bash
@@ -57,7 +58,7 @@ The application already has fully functional viewing capabilities (list and deta
 
 ## Application Structure
 
-The application follows a feature-based architecture similar to `rise-mobile-app`:
+The application follows a feature-based architecture:
 
 ```
 lib/
@@ -67,6 +68,8 @@ lib/
     ├── globals/                       # Shared utilities
     │   ├── config/                    # Configuration
     │   ├── services/                  # API client, interceptors
+    │   ├── theme/                     # Theme configuration
+    │   ├── widgets/                   # Reusable widgets
     │   └── utils/                     # Error messages, etc.
     └── features/
         ├── auth/                      # Authentication (sign-in only)
@@ -107,42 +110,50 @@ lib/
 
 ## Exercise Tasks
 
-### Stage 1: Create Sales Invoice (POST)
+### Task 1: Create Sales Invoice (POST)
 
-**Location:** `lib/src/features/sales/services/sales_service.dart`
+**Objective:** Implement the feature for creation of a new sales invoice. You are responsible for designing the UI and implementing the backend integration.
 
-**Task:** Implement the `createSalesInvoice` method.
+**Backend Integration:**
+- **Location:** `lib/src/features/sales/services/sales_service.dart`
+- **Method:** `createSalesInvoice`
+- **Endpoint:** `POST /companies/{company_id}/sales-invoices`
+- **Payload:** `SalesInvoiceModel` as JSON (exclude `id`, `created_at`, `updated_at`)
 
 **Requirements:**
-1. Use `_apiClient.post()` method
-2. Endpoint: `/companies/{company_id}/sales-invoices`
-3. Send `SalesInvoiceModel` as JSON (exclude `id`, `created_at`, `updated_at`)
+1. Implement the `createSalesInvoice` method in `SalesService`
+2. Use `_apiClient.post()` method
+3. Send `SalesInvoiceModel` as JSON (exclude read-only fields)
 4. Parse the response and return `ApiResponse<SalesInvoiceModel>`
 5. Handle errors appropriately
+6. Design and implement a UI screen for creating invoices
+7. Connect the UI to the service method via the provider
+8. Show success/error messages to the user
+9. Navigate appropriately after successful creation
 
 **Hints:**
 - Look at `fetchSalesInvoices` for endpoint pattern
 - Use `invoice.toJson()` to convert model to JSON
 - Remove read-only fields before sending
 - Use `ApiResponse.fromApiClientResponse` for parsing
+- Check `SalesInvoiceModel` to understand required fields
+- Use the existing design system and theme for UI consistency
 
 **Testing:**
 - After implementation, you should be able to create a new invoice
 - The invoice should appear in the list after creation
 - Show a success message after successful creation
+- Handle validation errors appropriately
 
-### Stage 2: Update Sales Invoice (PATCH)
+### Task 2: Update Sales Invoice (PATCH)
 
-**Location:** `lib/src/features/sales/services/sales_service.dart`
+**Objective:** Implement the feature for updating existing sales invoices. You are responsible for designing the UI and implementing the backend integration.
 
-**Task:** Implement the `updateSalesInvoice` method.
-
-**Requirements:**
-1. Use `_apiClient.patch()` method
-2. Endpoint: `/companies/{company_id}/sales-invoices/{invoice_id}`
-3. Send partial `SalesInvoiceModel` as JSON (exclude read-only fields)
-4. Parse the response and return `ApiResponse<SalesInvoiceModel>`
-5. Handle errors appropriately
+**Backend Integration:**
+- **Location:** `lib/src/features/sales/services/sales_service.dart`
+- **Method:** `updateSalesInvoice`
+- **Endpoint:** `PATCH /companies/{company_id}/sales-invoices/{invoice_id}`
+- **Payload:** Partial `SalesInvoiceModel` as JSON (exclude read-only fields)
 
 **Read-only fields to exclude:**
 - `id`
@@ -152,25 +163,41 @@ lib/
 - `status`
 - `payment_term` (for updates)
 
+**Requirements:**
+1. Implement the `updateSalesInvoice` method in `SalesService`
+2. Use `_apiClient.patch()` method
+3. Send partial `SalesInvoiceModel` as JSON (exclude read-only fields)
+4. Parse the response and return `ApiResponse<SalesInvoiceModel>`
+5. Handle errors appropriately
+6. Design and implement a UI screen for updating invoices
+7. Connect the UI to the service method via the provider
+8. Show success/error messages to the user
+9. Navigate appropriately after successful update
+10. Pre-populate the form with existing invoice data
+
 **Hints:**
 - Look at `fetchSalesInvoiceById` for endpoint pattern
 - Use `invoice.toJson()` and remove read-only fields
 - Use `ApiResponse.fromApiClientResponse` for parsing
+- Check `SalesInvoiceModel` to understand all fields
+- Use the existing design system and theme for UI consistency
+- Consider reusing UI components from Task 1 where appropriate
 
 **Testing:**
 - After implementation, you should be able to update an existing invoice
 - Changes should be reflected in the detail view
 - Show a success message after successful update
+- Handle validation errors appropriately
 
 ## Environment Configuration
 
-This exercise uses the **development environment** setup, matching the configuration from `rise-mobile-app`:
+This exercise uses the **development environment** setup:
 - **Environment:** Development (`ENVIRONMENT=dev`)
-- **API Base URL:** Development API endpoint
+- **API Base URL:** Configured in `.env.dev`
 - **Cognito:** Development user pool and client ID
 - **Region:** `eu-central-1`
 
-The configuration is loaded from `.env.dev` file by default, following the same pattern as `rise-mobile-app`'s `main_dev.dart`.
+The configuration is loaded from `.env.dev` file by default.
 
 ## API Endpoints Reference
 
@@ -192,12 +219,12 @@ All API calls require authentication via Bearer token (handled automatically by 
 - **Returns:** Single sales invoice
 
 #### POST /companies/{company_id}/sales-invoices
-- **Status:** ❌ TODO - Stage 1
+- **Status:** ❌ TODO - Task 1
 - **Body:** SalesInvoiceModel (without id, timestamps)
 - **Returns:** Created sales invoice
 
 #### PATCH /companies/{company_id}/sales-invoices/{invoice_id}
-- **Status:** ❌ TODO - Stage 2
+- **Status:** ❌ TODO - Task 2
 - **Body:** Partial SalesInvoiceModel (without read-only fields)
 - **Returns:** Updated sales invoice
 
@@ -213,15 +240,18 @@ Make sure your code:
 - Has no analysis errors or warnings
 - Follows the existing code patterns
 - Includes proper error handling
+- Uses the existing design system and theme
 
 ## Tips
 
-1. **Start with Stage 1** - Get create working first, then move to update
+1. **Start with Task 1** - Get create working first, then move to update
 2. **Test incrementally** - Test each endpoint as you implement it
 3. **Follow patterns** - Look at existing GET implementations for guidance
 4. **Handle errors** - Use `ErrorMessages` for user-friendly messages
 5. **Show feedback** - Display success/error messages to users
-6. **Check CI** - Make sure your code passes CI checks before finishing
+6. **Design thoughtfully** - Consider UX best practices for forms
+7. **Check CI** - Make sure your code passes CI checks before finishing
+8. **Review models** - Check `SalesInvoiceModel` to understand all available fields
 
 ## Questions?
 
@@ -230,6 +260,7 @@ During the live-coding session, feel free to ask questions about:
 - Expected request/response formats
 - Architecture patterns
 - Error handling approaches
+- Design system usage
 
 ## Good Luck! 🚀
 

@@ -95,7 +95,8 @@ class SelectedSalesInvoice extends _$SelectedSalesInvoice {
   }
 }
 
-// Placeholder provider - will be used in Stage 1
+// Provider for creating sales invoices
+// TODO: Task 1 - Implement UI screen and connect to this provider
 @riverpod
 class SalesInvoiceCreator extends _$SalesInvoiceCreator {
   late final SalesService _service;
@@ -107,7 +108,7 @@ class SalesInvoiceCreator extends _$SalesInvoiceCreator {
   }
 
   /// Create a new sales invoice
-  /// TODO: Stage 1 - Connect this to the service method
+  /// TODO: Task 1 - Connect UI screen to this provider method
   Future<SalesInvoiceModel?> createSalesInvoice(
     BuildContext context,
     String companyId,
@@ -139,7 +140,8 @@ class SalesInvoiceCreator extends _$SalesInvoiceCreator {
   }
 }
 
-// Placeholder provider - will be used in Stage 2
+// Provider for updating sales invoices
+// TODO: Task 2 - Implement UI screen and connect to this provider
 @riverpod
 class UpdateSalesInvoice extends _$UpdateSalesInvoice {
   late final SalesService _service;
@@ -151,7 +153,7 @@ class UpdateSalesInvoice extends _$UpdateSalesInvoice {
   }
 
   /// Update an existing sales invoice
-  /// TODO: Stage 2 - Connect this to the service method
+  /// TODO: Task 2 - Connect UI screen to this provider method
   Future<SalesInvoiceModel?> updateSalesInvoice(
     BuildContext context,
     String companyId,

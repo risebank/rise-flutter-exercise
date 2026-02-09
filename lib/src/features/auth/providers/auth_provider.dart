@@ -16,7 +16,7 @@ class Auth extends _$Auth {
   Future<AuthUser?> build() async {
     _service = AuthService();
     // Just return getCurrentUser() - it will return null if not signed in
-    // This matches rise-mobile-app's pattern and ensures auth state persists on page reload
+    // This ensures auth state persists on page reload
     // Note: This build method only runs on provider initialization or explicit invalidation
     // Error states set via login() will persist until explicitly cleared
     safePrint('🔍 [AuthProvider] Initializing auth state...');

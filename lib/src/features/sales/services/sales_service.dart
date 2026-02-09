@@ -85,8 +85,7 @@ class SalesService {
   }
 
   /// Create a new sales invoice
-  /// TODO: Stage 1 - Implement this method
-  /// This is a placeholder that needs to be implemented by the applicant
+  /// TODO: Task 1 - Implement this method
   /// Expected endpoint: POST /companies/{company_id}/sales-invoices
   /// Expected payload: SalesInvoiceModel (without id, created_at, updated_at)
   Future<ApiResponse<SalesInvoiceModel>> createSalesInvoice(
@@ -94,22 +93,15 @@ class SalesService {
     String companyId,
     SalesInvoiceModel invoice,
   ) async {
-    // TODO: Stage 1 - Implement POST request to create sales invoice
-    // 1. Use _apiClient.post() method
-    // 2. Endpoint: Endpoints.salesInvoices.replaceAll('{company_id}', companyId)
-    // 3. Data: invoice.toJson() (but exclude id, created_at, updated_at)
-    // 4. Parse response using SalesInvoiceModel.fromJson
-    // 5. Return ApiResponse with proper error handling
-
+    // TODO: Task 1 - Implement POST request to create sales invoice
     throw UnimplementedError(
       'createSalesInvoice is not yet implemented. '
-      'This is Stage 1 of the exercise - please implement the POST endpoint.',
+      'This is Task 1 of the exercise - please implement the POST endpoint.',
     );
   }
 
   /// Update an existing sales invoice
-  /// TODO: Stage 2 - Implement this method
-  /// This is a placeholder that needs to be implemented by the applicant
+  /// TODO: Task 2 - Implement this method
   /// Expected endpoint: PATCH /companies/{company_id}/sales-invoices/{invoice_id}
   /// Expected payload: SalesInvoiceModel (partial update, exclude read-only fields)
   Future<ApiResponse<SalesInvoiceModel>> updateSalesInvoice(
@@ -118,16 +110,10 @@ class SalesService {
     String invoiceId,
     SalesInvoiceModel invoice,
   ) async {
-    // TODO: Stage 2 - Implement PATCH request to update sales invoice
-    // 1. Use _apiClient.patch() method
-    // 2. Endpoint: Endpoints.salesInvoiceById(companyId, invoiceId)
-    // 3. Data: invoice.toJson() (but exclude id, created_at, updated_at, journal_number, status)
-    // 4. Parse response using SalesInvoiceModel.fromJson
-    // 5. Return ApiResponse with proper error handling
-
+    // TODO: Task 2 - Implement PATCH request to update sales invoice
     throw UnimplementedError(
       'updateSalesInvoice is not yet implemented. '
-      'This is Stage 2 of the exercise - please implement the PATCH endpoint.',
+      'This is Task 2 of the exercise - please implement the PATCH endpoint.',
     );
   }
 }

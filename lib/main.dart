@@ -138,7 +138,7 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.dark, // Default to dark mode to match rise-mobile-app
+      themeMode: ThemeMode.dark, // Default to dark mode
       routerConfig: router,
       // Prevent white flash during route transitions by using dark background
       builder: (context, child) {

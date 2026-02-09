@@ -46,9 +46,9 @@ class _SalesInvoiceDetailScreenState
       _companyId = authService.getCurrentCompanyId();
     }
 
-    // Fallback to instructions value if still null (for exercise setup)
-    // This should only happen if WhoAmI endpoint fails and cache is empty
-    _companyId ??= 'company-123'; // From INSTRUCTIONS.md
+    // Fallback value if still null (should not happen in normal operation)
+    // This should only occur if WhoAmI endpoint fails and cache is empty
+    _companyId ??= 'company-123';
 
     if (_companyId != null && _companyId!.isNotEmpty && mounted) {
       ref
@@ -85,27 +85,8 @@ class _SalesInvoiceDetailScreenState
         ),
         backgroundColor: colors?.surfaceContainerLowest,
         elevation: 0,
-        actions: [
-          // TODO: Stage 2 - Add edit button that navigates to edit screen
-          IconButton(
-            icon: Icon(Icons.edit, color: colors?.onSurface),
-            tooltip: 'Edit',
-            onPressed: () {
-              // TODO: Stage 2 - Navigate to edit screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Edit functionality - Stage 2 TODO',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colors?.onErrorContainer,
-                    ),
-                  ),
-                  backgroundColor: colors?.errorContainer,
-                ),
-              );
-            },
-          ),
-        ],
+        // TODO: Task 2 - Add navigation to edit screen if needed
+        // The design and implementation of the edit functionality is up to you
       ),
       body: invoiceState.when(
         data: (invoice) {

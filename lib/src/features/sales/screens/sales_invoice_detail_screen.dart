@@ -79,9 +79,7 @@ class _SalesInvoiceDetailScreenState
         ),
         title: Text(
           'Invoice Details',
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         backgroundColor: colors?.surfaceContainerLowest,
         elevation: 0,
@@ -122,121 +120,100 @@ class _SalesInvoiceDetailScreenState
                     padding: const EdgeInsets.only(bottom: 24),
                     child: RiseStatusBadge(status: invoice.status!),
                   ),
-                _buildSection(
-                  context,
-                  'Invoice Information',
-                  [
-                    RiseInfoRow(label: 'ID', value: invoice.id ?? 'N/A'),
-                    if (invoice.status != null)
-                      RiseInfoRow(label: 'Status', value: invoice.status!),
+                _buildSection(context, 'Invoice Information', [
+                  RiseInfoRow(label: 'ID', value: invoice.id ?? 'N/A'),
+                  if (invoice.status != null)
+                    RiseInfoRow(label: 'Status', value: invoice.status!),
+                  RiseInfoRow(
+                    label: 'Invoice Date',
+                    value: invoice.invoiceDate ?? 'N/A',
+                  ),
+                  RiseInfoRow(
+                    label: 'Due Date',
+                    value: invoice.dueDate ?? 'N/A',
+                  ),
+                  RiseInfoRow(
+                    label: 'Document Date',
+                    value: invoice.documentDate ?? 'N/A',
+                  ),
+                  if (invoice.journalNumber != null)
                     RiseInfoRow(
-                      label: 'Invoice Date',
-                      value: invoice.invoiceDate ?? 'N/A',
+                      label: 'Journal Number',
+                      value: invoice.journalNumber.toString(),
                     ),
-                    RiseInfoRow(
-                      label: 'Due Date',
-                      value: invoice.dueDate ?? 'N/A',
-                    ),
-                    RiseInfoRow(
-                      label: 'Document Date',
-                      value: invoice.documentDate ?? 'N/A',
-                    ),
-                    if (invoice.journalNumber != null)
-                      RiseInfoRow(
-                        label: 'Journal Number',
-                        value: invoice.journalNumber.toString(),
-                      ),
-                  ],
-                ),
+                ]),
                 const SizedBox(height: 24),
-                _buildSection(
-                  context,
-                  'Description',
-                  [
-                    Text(
-                      invoice.description ?? 'No description',
-                      style: textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
+                _buildSection(context, 'Description', [
+                  Text(
+                    invoice.description ?? 'No description',
+                    style: textTheme.bodyLarge,
+                  ),
+                ]),
                 const SizedBox(height: 24),
                 if (invoice.recipient != null)
-                  _buildSection(
-                    context,
-                    'Recipient',
-                    [
-                      RiseInfoRow(
-                        label: 'Name',
-                        value: invoice.recipient!.name ?? 'N/A',
-                      ),
-                      RiseInfoRow(
-                        label: 'Email',
-                        value: invoice.recipient!.email ?? 'N/A',
-                      ),
-                    ],
-                  ),
+                  _buildSection(context, 'Recipient', [
+                    RiseInfoRow(
+                      label: 'Name',
+                      value: invoice.recipient!.name ?? 'N/A',
+                    ),
+                    RiseInfoRow(
+                      label: 'Email',
+                      value: invoice.recipient!.email ?? 'N/A',
+                    ),
+                  ]),
                 if (invoice.recipientInvoicingEmail != null) ...[
                   const SizedBox(height: 24),
-                  _buildSection(
-                    context,
-                    'Invoicing Email',
-                    [
-                      Text(
-                        invoice.recipientInvoicingEmail!,
-                        style: textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
+                  _buildSection(context, 'Invoicing Email', [
+                    Text(
+                      invoice.recipientInvoicingEmail!,
+                      style: textTheme.bodyLarge,
+                    ),
+                  ]),
                 ],
                 if (invoice.recipientInvoicingAddress != null) ...[
                   const SizedBox(height: 24),
-                  _buildSection(
-                    context,
-                    'Invoicing Address',
-                    [
-                      RiseInfoRow(
-                        label: 'Street',
-                        value: invoice.recipientInvoicingAddress!.street
-                                ?.join(', ') ??
-                            'N/A',
-                      ),
-                      RiseInfoRow(
-                        label: 'City',
-                        value: invoice.recipientInvoicingAddress!.city ?? 'N/A',
-                      ),
-                      RiseInfoRow(
-                        label: 'Postal Code',
-                        value:
-                            invoice.recipientInvoicingAddress!.postalCode ?? 'N/A',
-                      ),
-                      RiseInfoRow(
-                        label: 'Region',
-                        value:
-                            invoice.recipientInvoicingAddress!.region ?? 'N/A',
-                      ),
-                      RiseInfoRow(
-                        label: 'Country',
-                        value: invoice.recipientInvoicingAddress!.countryCode ??
-                            'N/A',
-                      ),
-                    ],
-                  ),
+                  _buildSection(context, 'Invoicing Address', [
+                    RiseInfoRow(
+                      label: 'Street',
+                      value:
+                          invoice.recipientInvoicingAddress!.street?.join(
+                            ', ',
+                          ) ??
+                          'N/A',
+                    ),
+                    RiseInfoRow(
+                      label: 'City',
+                      value: invoice.recipientInvoicingAddress!.city ?? 'N/A',
+                    ),
+                    RiseInfoRow(
+                      label: 'Postal Code',
+                      value:
+                          invoice.recipientInvoicingAddress!.postalCode ??
+                          'N/A',
+                    ),
+                    RiseInfoRow(
+                      label: 'Region',
+                      value: invoice.recipientInvoicingAddress!.region ?? 'N/A',
+                    ),
+                    RiseInfoRow(
+                      label: 'Country',
+                      value:
+                          invoice.recipientInvoicingAddress!.countryCode ??
+                          'N/A',
+                    ),
+                  ]),
                 ],
                 const SizedBox(height: 24),
-                _buildSection(
-                  context,
-                  'References',
-                  [
-                    RiseInfoRow(
-                      label: 'Our Reference',
-                      value: invoice.ourReference ?? 'N/A',
-                    ),
-                    RiseInfoRow(
-                      label: 'Your Reference',
-                      value: invoice.yourReference ?? 'N/A',
-                    ),
-                  ],
-                ),
+                _buildSection(context, 'References', [
+                  RiseInfoRow(
+                    label: 'Our Reference',
+                    value: invoice.ourReference ?? 'N/A',
+                  ),
+                  RiseInfoRow(
+                    label: 'Your Reference',
+                    value: invoice.yourReference ?? 'N/A',
+                  ),
+                ]),
                 const SizedBox(height: 24),
                 _buildSection(
                   context,
@@ -303,75 +280,54 @@ class _SalesInvoiceDetailScreenState
                         }).toList(),
                 ),
                 const SizedBox(height: 24),
-                _buildSection(
-                  context,
-                  'Totals',
-                  [
-                    if (invoice.grossAmount != null)
-                      RiseInfoRow(
-                        label: 'Gross Amount',
-                        value: '€${invoice.grossAmount}',
-                        isBold: true,
-                      ),
-                    if (invoice.vatAmount != null)
-                      RiseInfoRow(
-                        label: 'VAT Amount',
-                        value: '€${invoice.vatAmount}',
-                        isBold: true,
-                      ),
-                  ],
-                ),
+                _buildSection(context, 'Totals', [
+                  if (invoice.grossAmount != null)
+                    RiseInfoRow(
+                      label: 'Gross Amount',
+                      value: '€${invoice.grossAmount}',
+                      isBold: true,
+                    ),
+                  if (invoice.vatAmount != null)
+                    RiseInfoRow(
+                      label: 'VAT Amount',
+                      value: '€${invoice.vatAmount}',
+                      isBold: true,
+                    ),
+                ]),
                 const SizedBox(height: 24),
-                _buildSection(
-                  context,
-                  'Metadata',
-                  [
+                _buildSection(context, 'Metadata', [
+                  RiseInfoRow(
+                    label: 'Currency',
+                    value: invoice.currency ?? 'N/A',
+                  ),
+                  RiseInfoRow(
+                    label: 'Invoicing Channel',
+                    value: invoice.invoicingChannel ?? 'N/A',
+                  ),
+                  if (invoice.paymentTerm != null)
                     RiseInfoRow(
-                      label: 'Currency',
-                      value: invoice.currency ?? 'N/A',
+                      label: 'Payment Term',
+                      value: '${invoice.paymentTerm} days',
                     ),
-                    RiseInfoRow(
-                      label: 'Invoicing Channel',
-                      value: invoice.invoicingChannel ?? 'N/A',
-                    ),
-                    if (invoice.paymentTerm != null)
-                      RiseInfoRow(
-                        label: 'Payment Term',
-                        value: '${invoice.paymentTerm} days',
-                      ),
-                    if (invoice.createdAt != null)
-                      RiseInfoRow(
-                        label: 'Created At',
-                        value: invoice.createdAt!,
-                      ),
-                    if (invoice.updatedAt != null)
-                      RiseInfoRow(
-                        label: 'Updated At',
-                        value: invoice.updatedAt!,
-                      ),
-                  ],
-                ),
+                  if (invoice.createdAt != null)
+                    RiseInfoRow(label: 'Created At', value: invoice.createdAt!),
+                  if (invoice.updatedAt != null)
+                    RiseInfoRow(label: 'Updated At', value: invoice.updatedAt!),
+                ]),
                 const SizedBox(height: 32),
               ],
             ),
           );
         },
-        loading: () => Center(
-          child: CircularProgressIndicator(
-            color: colors?.primary,
-          ),
-        ),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: colors?.primary)),
         error: (error, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: colors?.error,
-                ),
+                Icon(Icons.error_outline, size: 64, color: colors?.error),
                 const SizedBox(height: 16),
                 Text(
                   'Failed to load invoice',

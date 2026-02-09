@@ -82,8 +82,5 @@ class _StatusConfig {
   final Color backgroundColor;
   final Color textColor;
 
-  _StatusConfig({
-    required this.backgroundColor,
-    required this.textColor,
-  });
+  _StatusConfig({required this.backgroundColor, required this.textColor});
 }

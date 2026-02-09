@@ -40,13 +40,7 @@ The application already has fully functional viewing capabilities (list and deta
    flutter pub get
    ```
 
-3. **Set up environment variables:**
-   ```bash
-   cp .env.example .env.dev
-   ```
-   The `.env.dev` file is already configured with development environment values. The app loads `.env.dev` by default.
-
-4. **Run code generation:**
+3. **Run code generation:**
    ```bash
    flutter pub run build_runner build --delete-conflicting-outputs
    ```
@@ -191,13 +185,14 @@ lib/
 
 ## Environment Configuration
 
-This exercise uses the **development environment** setup:
-- **Environment:** Development (`ENVIRONMENT=dev`)
-- **API Base URL:** Configured in `.env.dev`
-- **Cognito:** Development user pool and client ID
+This exercise uses the **development environment** setup with hardcoded configuration:
+- **Environment:** Development
+- **API Base URL:** `https://6fsryeht36.execute-api.eu-central-1.amazonaws.com`
+- **Cognito User Pool ID:** `eu-central-1_Z1eAi51xP`
+- **Cognito Client ID:** `2fc1pebmi9acbnt8r42c6srbpe`
 - **Region:** `eu-central-1`
 
-The configuration is loaded from `.env.dev` file by default.
+The configuration is hardcoded in `lib/src/globals/config/environment.dart` for simplicity.
 
 ## API Endpoints Reference
 
@@ -241,6 +236,53 @@ Make sure your code:
 - Follows the existing code patterns
 - Includes proper error handling
 - Uses the existing design system and theme
+
+## Testing Requirements
+
+### Existing Tests
+
+The repository includes tests for:
+- Environment configuration (`test/environment_test.dart`)
+- Sales invoice models (`test/models/sales_invoice_model_test.dart`)
+- Endpoints (`test/services/endpoints_test.dart`)
+- Service method placeholders (`test/services/sales_service_test.dart`)
+
+### Test Requirements for Tasks
+
+**Task 1 (Create Sales Invoice):**
+- Add unit tests for `createSalesInvoice` method in `test/services/sales_service_test.dart`
+- Test cases should cover:
+  - Successful invoice creation
+  - Error handling (network errors, validation errors, etc.)
+  - Proper JSON serialization (excluding read-only fields: `id`, `created_at`, `updated_at`)
+  - Response parsing
+  - Endpoint URL construction
+  - Request payload format
+
+**Task 2 (Update Sales Invoice):**
+- Add unit tests for `updateSalesInvoice` method in `test/services/sales_service_test.dart`
+- Test cases should cover:
+  - Successful invoice update
+  - Error handling (network errors, validation errors, etc.)
+  - Proper JSON serialization (excluding read-only fields: `id`, `created_at`, `updated_at`, `journal_number`, `status`)
+  - Partial update handling
+  - Response parsing
+  - Endpoint URL construction
+  - Request payload format
+
+**Test Structure:**
+- Use `flutter_test` package (already included)
+- Follow existing test patterns in the repository
+- Use descriptive test names
+- Group related tests using `group()`
+- Ensure all tests pass before submitting
+
+**Running Tests:**
+```bash
+flutter test
+```
+
+All tests must pass for CI to succeed.
 
 ## Tips
 

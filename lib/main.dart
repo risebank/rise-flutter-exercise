@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:rise_flutter_exercise/src/features/auth/screens/login_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoices_list_screen.dart';
@@ -10,13 +9,10 @@ import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
 import 'amplifyconfiguration.dart';
 
-void main([List<String>? args, String? envFile]) async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment file (defaults to .env.dev for development)
-  await dotenv.load(fileName: envFile ?? '.env.dev');
-
-  // Initialize Amplify
+  // Initialize Amplify with hardcoded development configuration
   await configureAmplify();
 
   runApp(const ProviderScope(child: MyApp()));
@@ -52,13 +48,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           authStateValue = ref.read(authProvider);
         } catch (e) {
           // Provider is rebuilding, allow current navigation to proceed
-          debugPrint('⚠️ [Router] Auth provider rebuilding, allowing current navigation');
+          debugPrint(
+            '⚠️ [Router] Auth provider rebuilding, allowing current navigation',
+          );
           return null;
         }
 
         // If we couldn't read auth state, allow navigation to proceed
         if (authStateValue == null) {
-          debugPrint('⚠️ [Router] Auth state is null, allowing current navigation');
+          debugPrint(
+            '⚠️ [Router] Auth state is null, allowing current navigation',
+          );
           return null;
         }
 
@@ -117,7 +117,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         debugPrint('✅ [Router] Allowing navigation to proceed');
         return null;
       } catch (e) {
-        // If there's an error reading providers (e.g., during rebuild), 
+        // If there's an error reading providers (e.g., during rebuild),
         // allow navigation to proceed - the router will retry on next rebuild
         debugPrint('⚠️ [Router] Error during redirect check: $e');
         return null;
@@ -144,7 +144,9 @@ class MyApp extends ConsumerWidget {
       builder: (context, child) {
         // Use dark theme background color (#131313) to prevent white flashes
         return Container(
-          color: const Color(0xff131313), // Dark background from RiseAppColors.dark
+          color: const Color(
+            0xff131313,
+          ), // Dark background from RiseAppColors.dark
           child: child ?? const SizedBox.shrink(),
         );
       },

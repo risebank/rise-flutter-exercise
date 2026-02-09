@@ -1,21 +1,21 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 enum EnvironmentType { dev, staging, prod }
 
 class Environment {
-  static EnvironmentType get type {
-    final envString = dotenv.env['ENVIRONMENT'] ?? 'dev';
-    return EnvironmentType.values.firstWhere(
-      (e) => e.name == envString,
-      orElse: () => EnvironmentType.dev,
-    );
-  }
+  // Hardcoded development environment configuration
+  // These values are safe to commit as they are for the exercise/test environment
+  static const EnvironmentType _type = EnvironmentType.dev;
 
-  static String get apiBaseUrl => dotenv.env['API_BASE_URL'] ?? '';
-  static String get cognitoUserPoolId =>
-      dotenv.env['COGNITO_USER_POOL_ID'] ?? '';
-  static String get cognitoClientId => dotenv.env['COGNITO_CLIENT_ID'] ?? '';
-  static String get awsRegion => dotenv.env['AWS_REGION'] ?? 'eu-central-1';
+  static const String _apiBaseUrl =
+      'https://6fsryeht36.execute-api.eu-central-1.amazonaws.com';
+  static const String _cognitoUserPoolId = 'eu-central-1_Z1eAi51xP';
+  static const String _cognitoClientId = '2fc1pebmi9acbnt8r42c6srbpe';
+  static const String _awsRegion = 'eu-central-1';
+
+  static EnvironmentType get type => _type;
+  static String get apiBaseUrl => _apiBaseUrl;
+  static String get cognitoUserPoolId => _cognitoUserPoolId;
+  static String get cognitoClientId => _cognitoClientId;
+  static String get awsRegion => _awsRegion;
 
   static bool get isDev => type == EnvironmentType.dev;
   static bool get isStaging => type == EnvironmentType.staging;

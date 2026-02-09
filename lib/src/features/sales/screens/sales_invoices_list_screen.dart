@@ -114,9 +114,7 @@ class _SalesInvoicesListScreenState
       appBar: AppBar(
         title: Text(
           'Sales Invoices',
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         backgroundColor: colors?.surfaceContainerLowest,
         elevation: 0,
@@ -137,13 +135,11 @@ class _SalesInvoicesListScreenState
           final hasAttemptedFetch = ref
               .read(salesInvoicesProvider.notifier)
               .hasAttemptedFetch;
-          
+
           if (!hasAttemptedFetch) {
             // Initial state - show loading until fetch is triggered
             return Center(
-              child: CircularProgressIndicator(
-                color: colors?.primary,
-              ),
+              child: CircularProgressIndicator(color: colors?.primary),
             );
           }
 
@@ -190,22 +186,15 @@ class _SalesInvoicesListScreenState
             ),
           );
         },
-        loading: () => Center(
-          child: CircularProgressIndicator(
-            color: colors?.primary,
-          ),
-        ),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: colors?.primary)),
         error: (error, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: colors?.error,
-                ),
+                Icon(Icons.error_outline, size: 64, color: colors?.error),
                 const SizedBox(height: 16),
                 Text(
                   'Failed to load invoices',

@@ -236,34 +236,38 @@ class AuthService {
     if (error is AuthException) {
       final errorMessage = error.message;
       final underlyingException = error.underlyingException?.toString() ?? '';
-      
+
       // Log detailed error information
       safePrint('🔍 [AuthService._parseAmplifyError] Parsing AuthException:');
       safePrint('   - Message: $errorMessage');
       safePrint('   - UnderlyingException: $underlyingException');
       safePrint('   - RecoverySuggestion: ${error.recoverySuggestion}');
-      
+
       // Return the most informative error message
       if (errorMessage.isNotEmpty) {
         // Include underlying exception if it provides more context
-        if (underlyingException.isNotEmpty && 
-            !underlyingException.toLowerCase().contains(errorMessage.toLowerCase())) {
+        if (underlyingException.isNotEmpty &&
+            !underlyingException.toLowerCase().contains(
+              errorMessage.toLowerCase(),
+            )) {
           return '$errorMessage ($underlyingException)';
         }
         return errorMessage;
       }
-      
+
       // Fallback to underlying exception if message is empty
       if (underlyingException.isNotEmpty) {
         return underlyingException;
       }
-      
+
       return ErrorMessages.userFriendly(context, error.toString());
     }
-    
+
     // For non-AuthException errors, return the error string
     final errorString = error.toString();
-    safePrint('🔍 [AuthService._parseAmplifyError] Non-AuthException error: $errorString');
+    safePrint(
+      '🔍 [AuthService._parseAmplifyError] Non-AuthException error: $errorString',
+    );
     return ErrorMessages.userFriendly(context, errorString);
   }
 }

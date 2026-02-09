@@ -108,21 +108,23 @@ class ErrorInterceptor extends Interceptor {
     safePrint('✅ [ErrorInterceptor] Response received');
     safePrint('✅ [ErrorInterceptor] Status: ${response.statusCode}');
     safePrint('✅ [ErrorInterceptor] Path: ${response.requestOptions.path}');
-    
+
     // Check for CORS headers
     final corsHeader = response.headers.value('access-control-allow-origin');
     safePrint('✅ [ErrorInterceptor] CORS header: $corsHeader');
-    
+
     try {
       safePrint('✅ [ErrorInterceptor] Data type: ${response.data.runtimeType}');
       if (response.data == null) {
-        safePrint('⚠️ [ErrorInterceptor] Response data is null - possible CORS issue');
+        safePrint(
+          '⚠️ [ErrorInterceptor] Response data is null - possible CORS issue',
+        );
       }
     } catch (e) {
       safePrint('❌ [ErrorInterceptor] Error accessing response data: $e');
       safePrint('⚠️ [ErrorInterceptor] This may indicate a CORS issue');
     }
-    
+
     return handler.next(response);
   }
 
@@ -136,7 +138,8 @@ class ErrorInterceptor extends Interceptor {
     safePrint('❌ [ErrorInterceptor] Error Message: ${err.message}');
 
     // Check for CORS-related errors
-    final isCorsError = err.type == DioExceptionType.unknown ||
+    final isCorsError =
+        err.type == DioExceptionType.unknown ||
         (err.response == null && err.type != DioExceptionType.cancel) ||
         err.message?.toLowerCase().contains('cors') == true ||
         err.message?.toLowerCase().contains('access-control') == true;
@@ -155,19 +158,26 @@ class ErrorInterceptor extends Interceptor {
       safePrint(
         '❌ [ErrorInterceptor] Response Headers: ${err.response!.headers}',
       );
-      
+
       // Check for CORS headers in response
       final corsHeaders = {
-        'access-control-allow-origin': err.response!.headers.value('access-control-allow-origin'),
-        'access-control-allow-headers': err.response!.headers.value('access-control-allow-headers'),
-        'access-control-allow-methods': err.response!.headers.value('access-control-allow-methods'),
+        'access-control-allow-origin': err.response!.headers.value(
+          'access-control-allow-origin',
+        ),
+        'access-control-allow-headers': err.response!.headers.value(
+          'access-control-allow-headers',
+        ),
+        'access-control-allow-methods': err.response!.headers.value(
+          'access-control-allow-methods',
+        ),
       };
-      
+
       if (corsHeaders.values.any((h) => h != null)) {
         safePrint('📋 [ErrorInterceptor] CORS headers present: $corsHeaders');
-        
+
         // Check if Authorization header is explicitly allowed
-        final allowHeaders = corsHeaders['access-control-allow-headers']?.toLowerCase() ?? '';
+        final allowHeaders =
+            corsHeaders['access-control-allow-headers']?.toLowerCase() ?? '';
         if (allowHeaders == '*' || allowHeaders.contains('authorization')) {
           safePrint('✅ [ErrorInterceptor] Authorization header is allowed');
         } else {

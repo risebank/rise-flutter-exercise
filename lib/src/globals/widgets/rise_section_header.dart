@@ -6,11 +6,7 @@ class RiseSectionHeader extends StatelessWidget {
   final String title;
   final Widget? trailing;
 
-  const RiseSectionHeader({
-    super.key,
-    required this.title,
-    this.trailing,
-  });
+  const RiseSectionHeader({super.key, required this.title, this.trailing});
 
   @override
   Widget build(BuildContext context) {

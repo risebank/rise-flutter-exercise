@@ -43,7 +43,7 @@ class ApiClient {
       safePrint('🌐 [ApiClient] Query params: $queryParameters');
 
       safePrint('🌐 [ApiClient] Calling _dio.get()...');
-      
+
       Response response;
       try {
         response = await _dio.get(
@@ -66,7 +66,7 @@ class ApiClient {
       safePrint(
         '✅ [ApiClient] Response received - Status: ${response.statusCode}',
       );
-      
+
       // Check if response data is accessible (CORS check)
       dynamic responseData;
       try {
@@ -74,9 +74,11 @@ class ApiClient {
         safePrint(
           '📦 [ApiClient] Response data type: ${responseData.runtimeType}',
         );
-        
+
         if (responseData == null) {
-          safePrint('⚠️ [ApiClient] Response data is null - possible CORS issue');
+          safePrint(
+            '⚠️ [ApiClient] Response data is null - possible CORS issue',
+          );
           // Try to get raw response as fallback
           try {
             final rawResponse = response.data as String?;
@@ -98,7 +100,7 @@ class ApiClient {
           statusCode: response.statusCode,
         );
       }
-      
+
       if (responseData == null) {
         return ApiResponse.error(
           'Response data is null. This may be a CORS issue. '
@@ -106,7 +108,7 @@ class ApiClient {
           statusCode: response.statusCode,
         );
       }
-      
+
       safePrint('📦 [ApiClient] Response data: $responseData');
 
       return ApiResponse.success(
@@ -120,7 +122,7 @@ class ApiClient {
       safePrint('❌ [ApiClient] Error type: ${e.type}');
       safePrint('❌ [ApiClient] Error message: ${e.message}');
       safePrint('❌ [ApiClient] Error response: ${e.response?.data}');
-      
+
       // Check for CORS-related errors
       if (e.type == DioExceptionType.unknown ||
           e.type == DioExceptionType.badResponse) {
@@ -135,7 +137,7 @@ class ApiClient {
           );
         }
       }
-      
+
       String errorMessage = 'Request failed';
 
       if (e.response != null) {

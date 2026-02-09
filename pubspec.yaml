@@ -31,9 +31,6 @@ dependencies:
   # JSON Serialization
   json_annotation: ^4.9.0
   
-  # Environment variables
-  flutter_dotenv: ^5.2.1
-  
   # Internationalization
   intl: ^0.20.2
   flutter_localizations:
@@ -55,7 +52,3 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
-
-  # Assets for environment files (needed for web platform)
-  assets:
-    - .env.dev

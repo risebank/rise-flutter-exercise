@@ -17,7 +17,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _passwordError;
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
-  late final Auth _authNotifier; // Store notifier reference to avoid using ref after dispose
+  late final Auth
+  _authNotifier; // Store notifier reference to avoid using ref after dispose
 
   @override
   void initState() {
@@ -95,7 +96,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final hasDigits = RegExp(r'[0-9]').hasMatch(password);
       final hasLowercase = RegExp(r'[a-z]').hasMatch(password);
       // Match common special characters - use regular string to properly escape quotes
-      final hasSymbols = RegExp('[!@#\$%^&*()_+\\-=\\[\\]{};\':"\\\\|,.<>\\/?]').hasMatch(password);
+      final hasSymbols = RegExp(
+        '[!@#\$%^&*()_+\\-=\\[\\]{};\':"\\\\|,.<>\\/?]',
+      ).hasMatch(password);
 
       if (!hasMinLength) {
         passwordError = 'Password must be at least 8 characters';
@@ -139,9 +142,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       appBar: AppBar(
         title: Text(
           'Login',
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         backgroundColor: colors?.surfaceContainerLowest,
         elevation: 0,
@@ -176,273 +177,278 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 48),
                     TextField(
-                    key: const ValueKey('email_field'),
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    enabled: !authState.isLoading,
-                    style: textTheme.bodyLarge,
-                    onChanged: (_) => _validateForm(),
-                    autofillHints: const [AutofillHints.email],
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: textTheme.bodyMedium?.copyWith(
-                        color: colors?.onSurfaceVariant,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.email_outlined,
-                        color: colors?.onSurfaceVariant,
-                      ),
-                      filled: true,
-                      fillColor: colors?.surfaceContainerLowest,
-                      errorText: _emailError,
-                      errorStyle: textTheme.bodySmall?.copyWith(
-                        color: colors?.error,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _emailError != null
-                              ? (colors?.error ?? Colors.red)
-                              : (colors?.outlineVariant ?? Colors.transparent),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _emailError != null
-                              ? (colors?.error ?? Colors.red)
-                              : (colors?.outlineVariant ?? Colors.transparent),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _emailError != null
-                              ? (colors?.error ?? Colors.red)
-                              : (colors?.primary ?? Colors.blue),
-                          width: 2,
-                        ),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: colors?.error ?? Colors.red,
-                          width: 2,
-                        ),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: colors?.error ?? Colors.red,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    key: const ValueKey('password_field'),
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    enabled: !authState.isLoading,
-                    style: textTheme.bodyLarge,
-                    onChanged: (_) => _validateForm(),
-                    autofillHints: const [AutofillHints.password],
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: textTheme.bodyMedium?.copyWith(
-                        color: colors?.onSurfaceVariant,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.lock_outlined,
-                        color: colors?.onSurfaceVariant,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                      key: const ValueKey('email_field'),
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      enabled: !authState.isLoading,
+                      style: textTheme.bodyLarge,
+                      onChanged: (_) => _validateForm(),
+                      autofillHints: const [AutofillHints.email],
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: textTheme.bodyMedium?.copyWith(
                           color: colors?.onSurfaceVariant,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      filled: true,
-                      fillColor: colors?.surfaceContainerLowest,
-                      errorText: _passwordError,
-                      errorStyle: textTheme.bodySmall?.copyWith(
-                        color: colors?.error,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _passwordError != null
-                              ? (colors?.error ?? Colors.red)
-                              : (colors?.outlineVariant ?? Colors.transparent),
+                        prefixIcon: Icon(
+                          Icons.email_outlined,
+                          color: colors?.onSurfaceVariant,
                         ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _passwordError != null
-                              ? (colors?.error ?? Colors.red)
-                              : (colors?.outlineVariant ?? Colors.transparent),
+                        filled: true,
+                        fillColor: colors?.surfaceContainerLowest,
+                        errorText: _emailError,
+                        errorStyle: textTheme.bodySmall?.copyWith(
+                          color: colors?.error,
                         ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _passwordError != null
-                              ? (colors?.error ?? Colors.red)
-                              : (colors?.primary ?? Colors.blue),
-                          width: 2,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: _emailError != null
+                                ? (colors?.error ?? Colors.red)
+                                : (colors?.outlineVariant ??
+                                      Colors.transparent),
+                          ),
                         ),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: colors?.error ?? Colors.red,
-                          width: 2,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: _emailError != null
+                                ? (colors?.error ?? Colors.red)
+                                : (colors?.outlineVariant ??
+                                      Colors.transparent),
+                          ),
                         ),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: colors?.error ?? Colors.red,
-                          width: 2,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: _emailError != null
+                                ? (colors?.error ?? Colors.red)
+                                : (colors?.primary ?? Colors.blue),
+                            width: 2,
+                          ),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: colors?.error ?? Colors.red,
+                            width: 2,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: colors?.error ?? Colors.red,
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  authState.when(
-                    data: (_) => SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: _isFormValid && !authState.isLoading
-                            ? () async {
-                                // Clear any previous errors before attempting login
-                                authNotifier.clearError();
-                                await authNotifier.login(context);
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _isFormValid
-                              ? (colors?.primary)
-                              : (colors?.surfaceContainerHigh),
-                          foregroundColor: _isFormValid
-                              ? (colors?.onPrimary)
-                              : (colors?.onSurfaceVariant),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 16),
+                    TextField(
+                      key: const ValueKey('password_field'),
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      enabled: !authState.isLoading,
+                      style: textTheme.bodyLarge,
+                      onChanged: (_) => _validateForm(),
+                      autofillHints: const [AutofillHints.password],
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: textTheme.bodyMedium?.copyWith(
+                          color: colors?.onSurfaceVariant,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.lock_outlined,
+                          color: colors?.onSurfaceVariant,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: colors?.onSurfaceVariant,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        filled: true,
+                        fillColor: colors?.surfaceContainerLowest,
+                        errorText: _passwordError,
+                        errorStyle: textTheme.bodySmall?.copyWith(
+                          color: colors?.error,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: _passwordError != null
+                                ? (colors?.error ?? Colors.red)
+                                : (colors?.outlineVariant ??
+                                      Colors.transparent),
                           ),
                         ),
-                        child: Text(
-                          'Login',
-                          style: textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: _isFormValid
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: _passwordError != null
+                                ? (colors?.error ?? Colors.red)
+                                : (colors?.outlineVariant ??
+                                      Colors.transparent),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: _passwordError != null
+                                ? (colors?.error ?? Colors.red)
+                                : (colors?.primary ?? Colors.blue),
+                            width: 2,
+                          ),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: colors?.error ?? Colors.red,
+                            width: 2,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: colors?.error ?? Colors.red,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    authState.when(
+                      data: (_) => SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _isFormValid && !authState.isLoading
+                              ? () async {
+                                  // Clear any previous errors before attempting login
+                                  authNotifier.clearError();
+                                  await authNotifier.login(context);
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _isFormValid
+                                ? (colors?.primary)
+                                : (colors?.surfaceContainerHigh),
+                            foregroundColor: _isFormValid
                                 ? (colors?.onPrimary)
                                 : (colors?.onSurfaceVariant),
-                          ),
-                        ),
-                      ),
-                    ),
-                    loading: () => SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colors?.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              colors?.onPrimary ?? (colors?.primary ?? Colors.white),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    error: (error, _) => Column(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: colors?.errorContainer,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: colors?.error ?? Colors.transparent,
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: colors?.onErrorContainer,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  _formatErrorMessage(error.toString()),
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: colors?.onErrorContainer,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: _isFormValid
-                                ? () async {
-                                    authNotifier.clearError();
-                                    await authNotifier.login(context);
-                                  }
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _isFormValid
-                                  ? (colors?.primary)
-                                  : (colors?.surfaceContainerHigh),
-                              foregroundColor: _isFormValid
+                          child: Text(
+                            'Login',
+                            style: textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: _isFormValid
                                   ? (colors?.onPrimary)
                                   : (colors?.onSurfaceVariant),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
                             ),
-                            child: Text(
-                              'Try Again',
-                              style: textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: _isFormValid
-                                    ? (colors?.onPrimary)
-                                    : (colors?.onSurfaceVariant),
+                          ),
+                        ),
+                      ),
+                      loading: () => SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors?.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                colors?.onPrimary ??
+                                    (colors?.primary ?? Colors.white),
                               ),
                             ),
                           ),
                         ),
-                      ],
+                      ),
+                      error: (error, _) => Column(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: colors?.errorContainer,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: colors?.error ?? Colors.transparent,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: colors?.onErrorContainer,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    _formatErrorMessage(error.toString()),
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: colors?.onErrorContainer,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 48,
+                            child: ElevatedButton(
+                              onPressed: _isFormValid
+                                  ? () async {
+                                      authNotifier.clearError();
+                                      await authNotifier.login(context);
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _isFormValid
+                                    ? (colors?.primary)
+                                    : (colors?.surfaceContainerHigh),
+                                foregroundColor: _isFormValid
+                                    ? (colors?.onPrimary)
+                                    : (colors?.onSurfaceVariant),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Try Again',
+                                style: textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: _isFormValid
+                                      ? (colors?.onPrimary)
+                                      : (colors?.onSurfaceVariant),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   ],
                 ),
               ),

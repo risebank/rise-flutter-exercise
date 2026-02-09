@@ -1,6 +1,6 @@
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:rise_flutter_exercise/src/globals/config/environment.dart';
 
 String getAmplifyConfig() {
   return ''' {
@@ -15,9 +15,9 @@ String getAmplifyConfig() {
           
           "CognitoUserPool": {
             "Default": {
-              "PoolId": "${dotenv.env['COGNITO_USER_POOL_ID']}",
-              "AppClientId": "${dotenv.env['COGNITO_CLIENT_ID']}",
-              "Region": "${dotenv.env['AWS_REGION']}"
+              "PoolId": "${Environment.cognitoUserPoolId}",
+              "AppClientId": "${Environment.cognitoClientId}",
+              "Region": "${Environment.awsRegion}"
             }
           },
            "Auth": {

@@ -110,10 +110,7 @@ class InvoiceListItem extends StatelessWidget {
                       ),
                     ),
                   if (invoice.status != null)
-                    RiseStatusBadge(
-                      status: invoice.status!,
-                      isCompact: true,
-                    ),
+                    RiseStatusBadge(status: invoice.status!, isCompact: true),
                 ],
               ),
             ],

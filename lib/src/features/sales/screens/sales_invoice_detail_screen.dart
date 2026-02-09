@@ -82,7 +82,13 @@ class _SalesInvoiceDetailScreenState
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: colors?.onSurface),
-          onPressed: () => context.go('/sales-invoices'),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/sales-invoices');
+            }
+          },
         ),
         title: Text(
           'Invoice Details',

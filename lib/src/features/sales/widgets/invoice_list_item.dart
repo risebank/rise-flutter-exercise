@@ -26,7 +26,7 @@ class InvoiceListItem extends StatelessWidget {
     return RiseCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       onTap: () {
-        context.go('/sales-invoices/${invoice.id}');
+        context.push('/sales-invoices/${invoice.id}');
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

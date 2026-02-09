@@ -117,7 +117,11 @@ class _SalesInvoiceEditScreenState
       await ref
           .read(selectedSalesInvoiceProvider.notifier)
           .fetchSalesInvoice(context, _companyId!, widget.invoiceId);
-      context.pop();
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/sales-invoices/${widget.invoiceId}');
+      }
     }
   }
 

@@ -125,9 +125,29 @@ class _SalesInvoiceCreateScreenState
     }
 
     if (created != null) {
+      final theme = Theme.of(context);
+      final riseTheme = theme.extension<RiseAppThemeExtension>();
+      final colors = riseTheme?.config.colors;
+      final textTheme = theme.textTheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(ErrorMessages.createSuccess(context, 'Sales invoice')),
+          backgroundColor: colors?.success,
+          behavior: SnackBarBehavior.floating,
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: colors?.onSuccess),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  ErrorMessages.createSuccess(context, 'Sales invoice'),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colors?.onSuccess,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
       await ref
@@ -203,6 +223,28 @@ class _SalesInvoiceCreateScreenState
       recipientInvoicingAddress: address,
       lines: [line],
     );
+  }
+
+  Future<void> _pickDate({
+    required TextEditingController controller,
+    DateTime? initialDate,
+  }) async {
+    final now = DateTime.now();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? now,
+      firstDate: DateTime(now.year - 10),
+      lastDate: DateTime(now.year + 10),
+    );
+
+    if (selected == null || !mounted) {
+      return;
+    }
+
+    final year = selected.year.toString().padLeft(4, '0');
+    final month = selected.month.toString().padLeft(2, '0');
+    final day = selected.day.toString().padLeft(2, '0');
+    controller.text = '$year-$month-$day';
   }
 
   String? _requiredField(String? value, String label) {
@@ -287,6 +329,10 @@ class _SalesInvoiceCreateScreenState
                               fillColor: colors?.surfaceContainer,
                               borderColor: colors?.outlineVariant,
                             ),
+                            readOnly: true,
+                            onTap: () => _pickDate(
+                              controller: _invoiceDateController,
+                            ),
                             validator: (value) =>
                                 _requiredField(value, 'Invoice date'),
                           ),
@@ -299,6 +345,10 @@ class _SalesInvoiceCreateScreenState
                               fillColor: colors?.surfaceContainer,
                               borderColor: colors?.outlineVariant,
                             ),
+                            readOnly: true,
+                            onTap: () => _pickDate(
+                              controller: _dueDateController,
+                            ),
                             validator: (value) =>
                                 _requiredField(value, 'Due date'),
                           ),
@@ -310,6 +360,10 @@ class _SalesInvoiceCreateScreenState
                               hint: 'YYYY-MM-DD',
                               fillColor: colors?.surfaceContainer,
                               borderColor: colors?.outlineVariant,
+                            ),
+                            readOnly: true,
+                            onTap: () => _pickDate(
+                              controller: _documentDateController,
                             ),
                           ),
                           const SizedBox(height: 12),

@@ -140,11 +140,11 @@ class MyApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark, // Default to dark mode to match rise-mobile-app
       routerConfig: router,
-      // Prevent white flash during route transitions
+      // Prevent white flash during route transitions by using dark background
       builder: (context, child) {
-        final theme = Theme.of(context);
+        // Use dark theme background color (#131313) to prevent white flashes
         return Container(
-          color: theme.scaffoldBackgroundColor,
+          color: const Color(0xff131313), // Dark background from RiseAppColors.dark
           child: child ?? const SizedBox.shrink(),
         );
       },

@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:rise_flutter_exercise/src/globals/services/api_response.dart';
 import 'package:rise_flutter_exercise/src/globals/services/api_client.dart';
 import 'package:rise_flutter_exercise/src/globals/services/endpoints.dart';

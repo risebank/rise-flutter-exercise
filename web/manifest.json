@@ -1,11 +1,11 @@
 {
-    "name": "rise_flutter_exercise",
-    "short_name": "rise_flutter_exercise",
+    "name": "Rise Flutter Exercise",
+    "short_name": "Rise",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#131313",
+    "theme_color": "#131313",
+    "description": "Rise Flutter Exercise Application",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

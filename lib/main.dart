@@ -104,7 +104,7 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light, // Default to light mode for exercise
+      themeMode: ThemeMode.dark, // Default to dark mode to match rise-mobile-app
       routerConfig: router,
     );
   }

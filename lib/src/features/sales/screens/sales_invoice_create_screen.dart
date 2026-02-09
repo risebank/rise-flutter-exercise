@@ -28,7 +28,6 @@ class _SalesInvoiceCreateScreenState
   final _currencyController = TextEditingController();
   final _ourReferenceController = TextEditingController();
   final _yourReferenceController = TextEditingController();
-  final _recipientIdController = TextEditingController();
   final _recipientInvoicingEmailController = TextEditingController();
   final _streetController = TextEditingController();
   final _cityController = TextEditingController();
@@ -42,10 +41,16 @@ class _SalesInvoiceCreateScreenState
 
   String? _companyId;
   bool _isLoadingCompany = true;
+  String? _selectedRecipientId;
+  final Map<String, String> _recipientOptions = const {
+    '718d6a3e-c5ac-49c7-8fae-f57021ca67dd': 'Basemark Oy',
+    '64867891-2bda-4cf8-8c94-5fc25b77a3e0': 'Growity Oy',
+  };
 
   @override
   void initState() {
     super.initState();
+    _selectedRecipientId = _recipientOptions.keys.first;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCompanyId();
     });
@@ -60,7 +65,6 @@ class _SalesInvoiceCreateScreenState
     _currencyController.dispose();
     _ourReferenceController.dispose();
     _yourReferenceController.dispose();
-    _recipientIdController.dispose();
     _recipientInvoicingEmailController.dispose();
     _streetController.dispose();
     _cityController.dispose();
@@ -126,16 +130,15 @@ class _SalesInvoiceCreateScreenState
           content: Text(ErrorMessages.createSuccess(context, 'Sales invoice')),
         ),
       );
+      await ref
+          .read(salesInvoicesProvider.notifier)
+          .fetchSalesInvoices(context, _companyId!);
       context.go('/sales-invoices');
     }
   }
 
   SalesInvoiceModel _buildInvoice() {
-    const fallbackRecipientId = '718d6a3e-c5ac-49c7-8fae-f57021ca67dd';
-    final recipientId = _recipientIdController.text.trim().isEmpty
-        ? fallbackRecipientId
-        : _recipientIdController.text.trim();
-    final recipient = RecipientModel(id: recipientId);
+    final recipient = RecipientModel(id: _selectedRecipientId);
 
     final address = AddressModel(
       street: _streetController.text.trim().isEmpty
@@ -347,14 +350,29 @@ class _SalesInvoiceCreateScreenState
                     RiseCard(
                       child: Column(
                         children: [
-                          TextFormField(
-                            controller: _recipientIdController,
+                          // Temporary hack: restrict recipients to known IDs
+                          DropdownButtonFormField<String>(
+                            value: _selectedRecipientId,
+                            items: _recipientOptions.entries
+                                .map(
+                                  (entry) => DropdownMenuItem<String>(
+                                    value: entry.key,
+                                    child: Text(entry.value),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedRecipientId = value;
+                              });
+                            },
                             decoration: _inputDecoration(
-                              label: 'Recipient ID',
-                              hint: 'Default: 718d6a3e-c5ac-49c7-8fae-f57021ca67dd',
+                              label: 'Recipient',
                               fillColor: colors?.surfaceContainer,
                               borderColor: colors?.outlineVariant,
                             ),
+                            validator: (value) =>
+                                _requiredField(value, 'Recipient'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(

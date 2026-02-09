@@ -109,7 +109,7 @@ class SalesService {
     required Set<String> excludeKeys,
   }) {
     // Helper that attempts to convert model instances to serializable forms
-    dynamic _toSerializable(dynamic v) {
+    dynamic toSerializable(dynamic v) {
       if (v == null) return null;
       if (v is Map<String, dynamic>) return v;
       if (v is List) return v;
@@ -136,7 +136,7 @@ class SalesService {
 
         if (value == null) return;
 
-        final serial = _toSerializable(value);
+        final serial = toSerializable(value);
 
         if (serial == null) return;
 
@@ -147,7 +147,7 @@ class SalesService {
           final cleanedList = <dynamic>[];
           for (var item in serial) {
             if (item == null) continue;
-            final s = _toSerializable(item);
+            final s = toSerializable(item);
             if (s is Map<String, dynamic>) {
               final nested = cleanMap(s);
               if (nested.isNotEmpty) cleanedList.add(nested);

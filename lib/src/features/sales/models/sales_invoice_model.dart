@@ -34,6 +34,8 @@ class SalesInvoiceModel {
   final String? recipientInvoicingEmail;
   @JsonKey(name: 'recipient_invoicing_address')
   final AddressModel? recipientInvoicingAddress;
+  @JsonKey(name: 'sender_address')
+  final AddressModel? senderAddress;
   final List<InvoiceLineModel> lines;
   @JsonKey(name: 'created_at')
   final String? createdAt;
@@ -58,6 +60,7 @@ class SalesInvoiceModel {
     this.recipient,
     this.recipientInvoicingEmail,
     this.recipientInvoicingAddress,
+    this.senderAddress,
     required this.lines,
     this.createdAt,
     this.updatedAt,
@@ -85,7 +88,7 @@ class RecipientModel {
 
 @JsonSerializable()
 class AddressModel {
-  final String? street;
+  final List<String>? street;
   final String? city;
   @JsonKey(name: 'postal_code')
   final String? postalCode;

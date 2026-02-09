@@ -31,6 +31,11 @@ SalesInvoiceModel _$SalesInvoiceModelFromJson(Map<String, dynamic> json) =>
           : AddressModel.fromJson(
               json['recipient_invoicing_address'] as Map<String, dynamic>,
             ),
+      senderAddress: json['sender_address'] == null
+          ? null
+          : AddressModel.fromJson(
+              json['sender_address'] as Map<String, dynamic>,
+            ),
       lines: (json['lines'] as List<dynamic>)
           .map((e) => InvoiceLineModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -57,6 +62,7 @@ Map<String, dynamic> _$SalesInvoiceModelToJson(SalesInvoiceModel instance) =>
       'recipient': instance.recipient,
       'recipient_invoicing_email': instance.recipientInvoicingEmail,
       'recipient_invoicing_address': instance.recipientInvoicingAddress,
+      'sender_address': instance.senderAddress,
       'lines': instance.lines,
       'created_at': instance.createdAt,
       'updated_at': instance.updatedAt,
@@ -77,7 +83,7 @@ Map<String, dynamic> _$RecipientModelToJson(RecipientModel instance) =>
     };
 
 AddressModel _$AddressModelFromJson(Map<String, dynamic> json) => AddressModel(
-  street: json['street'] as String?,
+  street: (json['street'] as List<dynamic>?)?.map((e) => e as String).toList(),
   city: json['city'] as String?,
   postalCode: json['postal_code'] as String?,
   region: json['region'] as String?,

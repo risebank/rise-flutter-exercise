@@ -123,7 +123,7 @@ class _SalesInvoiceDetailScreenState
                   _buildSection('Invoicing Address', [
                     _buildInfoRow(
                       'Street',
-                      invoice.recipientInvoicingAddress!.street ?? 'N/A',
+                      invoice.recipientInvoicingAddress!.street?.join(', ') ?? 'N/A',
                     ),
                     _buildInfoRow(
                       'City',

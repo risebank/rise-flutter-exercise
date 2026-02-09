@@ -83,6 +83,11 @@ class SalesService {
       excludeKeys: {'id', 'created_at', 'updated_at'},
     );
 
+    // Log payload for debugging while developing (remove in production)
+    try {
+      safePrint('🔁 [SalesService] POST payload: $payload');
+    } catch (_) {}
+
     final response = await _apiClient.post<Map<String, dynamic>>(
       endpoint,
       data: payload,
@@ -162,6 +167,11 @@ class SalesService {
         'payment_term',
       },
     );
+
+    // Log payload for debugging while developing (remove in production)
+    try {
+      safePrint('🔁 [SalesService] PATCH payload: $payload');
+    } catch (_) {}
 
     final response = await _apiClient.patch<Map<String, dynamic>>(
       endpoint,

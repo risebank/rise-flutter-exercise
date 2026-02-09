@@ -71,10 +71,29 @@ class SalesService {
     String companyId,
     SalesInvoiceModel invoice,
   ) async {
-    // TODO: Task 1 - Implement POST request to create sales invoice
-    throw UnimplementedError(
-      'createSalesInvoice is not yet implemented. '
-      'This is Task 1 of the exercise - please implement the POST endpoint.',
+    final endpoint = Endpoints.salesInvoices.replaceAll(
+      '{company_id}',
+      companyId,
+    );
+
+    final payload = Map<String, dynamic>.from(invoice.toJson());
+    // Remove read-only fields
+    payload.remove('id');
+    payload.remove('created_at');
+    payload.remove('updated_at');
+
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      endpoint,
+      data: payload,
+      context: context,
+    );
+
+    return ApiResponse.fromApiClientResponse(
+      context,
+      response,
+      parser: (json) =>
+          SalesInvoiceModel.fromJson(json as Map<String, dynamic>),
+      errorMessage: ErrorMessages.createError(context, 'sales invoice'),
     );
   }
 
@@ -88,10 +107,29 @@ class SalesService {
     String invoiceId,
     SalesInvoiceModel invoice,
   ) async {
-    // TODO: Task 2 - Implement PATCH request to update sales invoice
-    throw UnimplementedError(
-      'updateSalesInvoice is not yet implemented. '
-      'This is Task 2 of the exercise - please implement the PATCH endpoint.',
+    final endpoint = Endpoints.salesInvoiceById(companyId, invoiceId);
+
+    final payload = Map<String, dynamic>.from(invoice.toJson());
+    // Remove read-only fields
+    payload.remove('id');
+    payload.remove('created_at');
+    payload.remove('updated_at');
+    payload.remove('journal_number');
+    payload.remove('status');
+    payload.remove('payment_term');
+
+    final response = await _apiClient.patch<Map<String, dynamic>>(
+      endpoint,
+      data: payload,
+      context: context,
+    );
+
+    return ApiResponse.fromApiClientResponse(
+      context,
+      response,
+      parser: (json) =>
+          SalesInvoiceModel.fromJson(json as Map<String, dynamic>),
+      errorMessage: ErrorMessages.updateError(context, 'sales invoice'),
     );
   }
 }

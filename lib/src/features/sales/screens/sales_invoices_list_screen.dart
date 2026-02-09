@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/sales/widgets/invoice_list_item.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
 
@@ -199,7 +200,7 @@ class _SalesInvoicesListScreenState
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).pushNamed('/sales-invoices/create'),
+        onPressed: () => context.go('/sales-invoices/create'),
         child: const Icon(Icons.add),
       ),
     );

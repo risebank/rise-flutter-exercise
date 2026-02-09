@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rise_flutter_exercise/src/features/sales/models/sales_invoice_model.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
 
 class SalesInvoiceCreateScreen extends ConsumerStatefulWidget {
@@ -67,8 +68,8 @@ class _SalesInvoiceCreateScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Invoice created: ${result.id ?? 'unknown'}')),
       );
-      // Navigate back to list
-      Navigator.of(context).pop();
+      // Navigate back to list via router
+      context.go('/sales-invoices');
     } else {
       final state = ref.read(salesInvoiceCreatorProvider);
       final message = state.hasError ? state.asError!.error.toString() : 'Failed to create invoice';

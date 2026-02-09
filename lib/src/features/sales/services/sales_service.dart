@@ -216,4 +216,45 @@ class SalesService {
       errorMessage: ErrorMessages.updateError(context, 'sales invoice'),
     );
   }
+
+  /// Update an existing sales invoice with a partial payload (Map)
+  Future<ApiResponse<SalesInvoiceModel>> updateSalesInvoicePartial(
+    BuildContext context,
+    String companyId,
+    String invoiceId,
+    Map<String, dynamic> partialPayload,
+  ) async {
+    final endpoint = Endpoints.salesInvoiceById(companyId, invoiceId);
+
+    // Clean and exclude read-only fields
+    final payload = _preparePayload(
+      Map<String, dynamic>.from(partialPayload),
+      excludeKeys: {
+        'id',
+        'created_at',
+        'updated_at',
+        'journal_number',
+        'status',
+        'payment_term',
+      },
+    );
+
+    try {
+      debugPrint('🔁 [SalesService] PATCH partial payload: $payload');
+    } catch (_) {}
+
+    final response = await _apiClient.patch<Map<String, dynamic>>(
+      endpoint,
+      data: payload,
+      context: context,
+    );
+
+    return ApiResponse.fromApiClientResponse(
+      context,
+      response,
+      parser: (json) =>
+          SalesInvoiceModel.fromJson(json as Map<String, dynamic>),
+      errorMessage: ErrorMessages.updateError(context, 'sales invoice'),
+    );
+  }
 }

@@ -201,4 +201,37 @@ class UpdateSalesInvoice extends _$UpdateSalesInvoice {
       return null;
     }
   }
+
+  /// Update an existing sales invoice with a partial payload
+  Future<SalesInvoiceModel?> updateSalesInvoicePartial(
+    BuildContext context,
+    String companyId,
+    String invoiceId,
+    Map<String, dynamic> partialPayload,
+  ) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final response = await _service.updateSalesInvoicePartial(
+        context,
+        companyId,
+        invoiceId,
+        partialPayload,
+      );
+
+      if (response.success && response.data != null) {
+        state = AsyncValue.data(response.data);
+        return response.data;
+      } else {
+        state = AsyncValue.error(
+          response.message ?? 'Failed to update sales invoice',
+          StackTrace.current,
+        );
+        return null;
+      }
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e.toString(), stackTrace);
+      return null;
+    }
+  }
 }

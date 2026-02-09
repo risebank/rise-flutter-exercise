@@ -86,34 +86,21 @@ class _SalesInvoiceEditScreenState
       return;
     }
 
-    // Create updated invoice with form values
-    final updatedInvoice = SalesInvoiceModel(
-      id: _originalInvoice!.id,
-      description: _descriptionController.text.trim(),
-      currency: _currencyController.text.trim().isEmpty
+    // Build minimal partial payload: only editable fields
+    final payload = <String, dynamic>{
+      'description': _descriptionController.text.trim(),
+      'currency': _currencyController.text.trim().isEmpty
           ? 'EUR'
           : _currencyController.text.trim(),
-      invoiceDate: _originalInvoice!.invoiceDate,
-      dueDate: _originalInvoice!.dueDate,
-      documentDate: _originalInvoice!.documentDate,
-      ourReference: _originalInvoice!.ourReference,
-      yourReference: _originalInvoice!.yourReference,
-      recipient: _originalInvoice!.recipient,
-      recipientInvoicingEmail: _originalInvoice!.recipientInvoicingEmail,
-      recipientInvoicingAddress: _originalInvoice!.recipientInvoicingAddress,
-      senderAddress: _originalInvoice!.senderAddress,
-      lines: _originalInvoice!.lines,
-      createdAt: _originalInvoice!.createdAt,
-      updatedAt: _originalInvoice!.updatedAt,
-    );
+    };
 
     final updater = ref.read(updateSalesInvoiceProvider.notifier);
 
-    final result = await updater.updateSalesInvoice(
+    final result = await updater.updateSalesInvoicePartial(
       context,
       _companyId!,
       widget.invoiceId,
-      updatedInvoice,
+      payload,
     );
 
     if (result != null) {

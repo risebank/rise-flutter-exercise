@@ -26,22 +26,11 @@ class SalesInvoices extends _$SalesInvoices {
     state = const AsyncValue.loading();
 
     try {
-      debugPrint('🔄 [SalesProvider] Calling fetchSalesInvoices');
       final response = await _service.fetchSalesInvoices(context, companyId);
 
-      debugPrint(
-        '📊 [SalesProvider] Response received - success: ${response.success}',
-      );
-      debugPrint('📊 [SalesProvider] Response message: ${response.message}');
-      debugPrint('📊 [SalesProvider] Has data: ${response.data != null}');
-
       if (response.success && response.data != null) {
-        debugPrint(
-          '✅ [SalesProvider] Setting state with ${response.data!.data.length} invoices',
-        );
         state = AsyncValue.data(response.data!.data);
       } else {
-        debugPrint('❌ [SalesProvider] Response failed: ${response.message}');
         state = AsyncValue.error(
           response.message ?? 'Failed to fetch sales invoices',
           StackTrace.current,
@@ -49,7 +38,6 @@ class SalesInvoices extends _$SalesInvoices {
       }
     } catch (e, stackTrace) {
       debugPrint('❌ [SalesProvider] Exception: $e');
-      debugPrint('❌ [SalesProvider] Stack trace: $stackTrace');
       state = AsyncValue.error(e.toString(), stackTrace);
     }
   }

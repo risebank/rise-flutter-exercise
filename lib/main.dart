@@ -48,40 +48,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           authStateValue = ref.read(authProvider);
         } catch (e) {
           // Provider is rebuilding, allow current navigation to proceed
-          debugPrint(
-            '⚠️ [Router] Auth provider rebuilding, allowing current navigation',
-          );
           return null;
         }
 
         // If we couldn't read auth state, allow navigation to proceed
         if (authStateValue == null) {
-          debugPrint(
-            '⚠️ [Router] Auth state is null, allowing current navigation',
-          );
           return null;
         }
-
-        debugPrint(
-          '🔍 [Router] Redirect check - Auth state: isLoading=${authStateValue.isLoading}, hasValue=${authStateValue.hasValue}, hasError=${authStateValue.hasError}',
-        );
-        debugPrint('🔍 [Router] Current location: ${state.matchedLocation}');
 
         // CRITICAL: If auth state is loading (e.g., during login), don't redirect
         // This prevents blank screen during login by keeping the login screen mounted
         if (authStateValue.isLoading) {
-          debugPrint(
-            '⏳ [Router] Auth state is loading (login in progress), allowing current navigation',
-          );
           return null; // Don't redirect while loading - keeps login screen visible
         }
 
         // If we're on login page and there's an error, stay on login page
         // This prevents flicker when login fails - user should see the error message
         if (isGoingToLogin && authStateValue.hasError) {
-          debugPrint(
-            '⏳ [Router] Login error detected, staying on login page to show error',
-          );
           return null; // Stay on login page to show error
         }
 
@@ -91,35 +74,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         final authNotifier = ref.read(authProvider.notifier);
         final isSignedIn = await authNotifier.isUserSignedIn();
 
-        debugPrint(
-          '🔍 [Router] Is signed in: $isSignedIn, Going to login: $isGoingToLogin',
-        );
-        debugPrint(
-          '🔍 [Router] Auth state value: ${authStateValue.value?.userId ?? "null"}',
-        );
-
         // Redirect to login if not authenticated and not already going to login
         if (!isSignedIn && !isGoingToLogin) {
-          debugPrint('➡️ [Router] Redirecting to /login (not authenticated)');
           return '/login';
         }
 
         // Redirect to sales invoices if authenticated and trying to access login
         // BUT only if login is not in progress (checked above)
         if (isSignedIn && isGoingToLogin) {
-          debugPrint(
-            '➡️ [Router] Redirecting to /sales-invoices (authenticated, trying to access login)',
-          );
           return '/sales-invoices';
         }
 
         // Allow navigation to proceed
-        debugPrint('✅ [Router] Allowing navigation to proceed');
         return null;
       } catch (e) {
         // If there's an error reading providers (e.g., during rebuild),
         // allow navigation to proceed - the router will retry on next rebuild
-        debugPrint('⚠️ [Router] Error during redirect check: $e');
         return null;
       }
     },

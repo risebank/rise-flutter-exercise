@@ -25,8 +25,6 @@ class ApiClient {
     // Configure response type for web to handle CORS properly
     _dio.options.responseType = ResponseType.json;
 
-    safePrint('🌐 [ApiClient] Initialized with base URL: ${Endpoints.baseUrl}');
-
     _dio.interceptors.addAll([AuthInterceptor(), ErrorInterceptor()]);
   }
 
@@ -36,14 +34,6 @@ class ApiClient {
     BuildContext? context,
   }) async {
     try {
-      safePrint('🌐 [ApiClient] GET request starting');
-      safePrint('🌐 [ApiClient] Path: $path');
-      safePrint('🌐 [ApiClient] Base URL: ${_dio.options.baseUrl}');
-      safePrint('🌐 [ApiClient] Full URL: ${_dio.options.baseUrl}$path');
-      safePrint('🌐 [ApiClient] Query params: $queryParameters');
-
-      safePrint('🌐 [ApiClient] Calling _dio.get()...');
-
       Response response;
       try {
         response = await _dio.get(
@@ -59,21 +49,10 @@ class ApiClient {
         rethrow;
       }
 
-      safePrint('🌐 [ApiClient] Request completed successfully');
-      safePrint('🌐 [ApiClient] Response status: ${response.statusCode}');
-      safePrint('🌐 [ApiClient] Response headers: ${response.headers}');
-
-      safePrint(
-        '✅ [ApiClient] Response received - Status: ${response.statusCode}',
-      );
-
       // Check if response data is accessible (CORS check)
       dynamic responseData;
       try {
         responseData = response.data;
-        safePrint(
-          '📦 [ApiClient] Response data type: ${responseData.runtimeType}',
-        );
 
         if (responseData == null) {
           safePrint(
@@ -83,7 +62,6 @@ class ApiClient {
           try {
             final rawResponse = response.data as String?;
             if (rawResponse != null && rawResponse.isNotEmpty) {
-              safePrint('📦 [ApiClient] Attempting to parse raw response');
               responseData = jsonDecode(rawResponse);
             }
           } catch (e) {
@@ -109,20 +87,11 @@ class ApiClient {
         );
       }
 
-      safePrint('📦 [ApiClient] Response data: $responseData');
-
       return ApiResponse.success(
         responseData as T,
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
-      safePrint(
-        '❌ [ApiClient] DioException - Status: ${e.response?.statusCode}',
-      );
-      safePrint('❌ [ApiClient] Error type: ${e.type}');
-      safePrint('❌ [ApiClient] Error message: ${e.message}');
-      safePrint('❌ [ApiClient] Error response: ${e.response?.data}');
-
       // Check for CORS-related errors
       if (e.type == DioExceptionType.unknown ||
           e.type == DioExceptionType.badResponse) {
@@ -165,9 +134,8 @@ class ApiClient {
         errorMessage,
         statusCode: e.response?.statusCode,
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       safePrint('❌ [ApiClient] Unexpected error: $e');
-      safePrint('❌ [ApiClient] Stack trace: $stackTrace');
       return ApiResponse.error('Unexpected error: ${e.toString()}');
     }
   }

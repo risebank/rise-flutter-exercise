@@ -19,33 +19,17 @@ class Auth extends _$Auth {
     // This ensures auth state persists on page reload
     // Note: This build method only runs on provider initialization or explicit invalidation
     // Error states set via login() will persist until explicitly cleared
-    safePrint('🔍 [AuthProvider] Initializing auth state...');
 
     // First check if user is signed in via Amplify session
     final isSignedIn = await _service.isUserSignedIn();
-    safePrint('🔍 [AuthProvider] Amplify session check: $isSignedIn');
 
     if (!isSignedIn) {
-      safePrint('ℹ️ [AuthProvider] No active session found');
       return null;
     }
 
     // If signed in, get the user
     final user = await _service.getCurrentUser();
-    if (user != null) {
-      safePrint(
-        '✅ [AuthProvider] User found on initialization: ${user.userId}',
-      );
-      // Ensure WhoAmI is cached if available
-      final companyId = _service.getCurrentCompanyId();
-      if (companyId == null || companyId.isEmpty) {
-        safePrint(
-          '⚠️ [AuthProvider] Company ID not cached, will be fetched on demand',
-        );
-      } else {
-        safePrint('✅ [AuthProvider] Company ID cached: $companyId');
-      }
-    } else {
+    if (user == null) {
       safePrint('⚠️ [AuthProvider] Session exists but user retrieval failed');
     }
     return user;
@@ -129,9 +113,7 @@ class Auth extends _$Auth {
     try {
       // Check Amplify session directly - don't rely on provider state
       // This ensures it works correctly on page reload when provider state might not be initialized yet
-      final isSignedIn = await _service.isUserSignedIn();
-      safePrint('🔍 [AuthProvider.isUserSignedIn] Result: $isSignedIn');
-      return isSignedIn;
+      return await _service.isUserSignedIn();
     } catch (e) {
       safePrint('❌ [AuthProvider.isUserSignedIn] Error: $e');
       return false;

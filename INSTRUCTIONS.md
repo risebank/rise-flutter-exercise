@@ -35,12 +35,26 @@ The application already has fully functional viewing capabilities (list and deta
    cd rise-flutter-exercise
    ```
 
-2. **Install dependencies:**
+2. **Checkout the develop branch and create your feature branch:**
+   ```bash
+   # Fetch all branches
+   git fetch origin
+   
+   # Checkout the develop branch
+   git checkout develop
+   
+   # Create a new feature branch for your work
+   git checkout -b feature/your-name-sales-invoices
+   ```
+   
+   **Important:** Always base your feature branch from `develop`, not `main`. This ensures you're working with the latest codebase.
+
+3. **Install dependencies:**
    ```bash
    flutter pub get
    ```
 
-3. **Run code generation:**
+4. **Run code generation:**
    ```bash
    flutter pub run build_runner build --delete-conflicting-outputs
    ```
@@ -103,6 +117,8 @@ lib/
 - The CI pipeline will check formatting and analysis
 
 ## Exercise Tasks
+
+**Important:** Please proceed carefully through both tasks. Take your time to understand the existing codebase structure, follow the patterns established in the code, and ensure your implementation is complete and well-tested before moving to the next task.
 
 ### Task 1: Create Sales Invoice (POST)
 
@@ -298,6 +314,51 @@ flutter test
 
 All tests must pass for CI to succeed.
 
+## Submitting Your Work
+
+### Creating a Pull Request
+
+Once you have completed both tasks:
+
+1. **Ensure all tests pass locally:**
+   ```bash
+   flutter test
+   dart format .
+   flutter analyze
+   ```
+
+2. **Commit your changes:**
+   ```bash
+   git add .
+   git commit -m "Implement Task 1 and Task 2: Create and update sales invoices"
+   ```
+
+3. **Push your feature branch:**
+   ```bash
+   git push origin feature/your-name-sales-invoices
+   ```
+
+4. **Create a Pull Request:**
+   - Go to the repository on GitHub
+   - Click "New Pull Request"
+   - Set the base branch to **`develop`** (not `main`)
+   - Set the compare branch to your feature branch
+   - Add a descriptive title and description
+   - Submit the PR
+
+5. **CI Checks:**
+   - The CI pipeline will automatically run when you create the PR
+   - All checks must pass:
+     - ✅ Code formatting (`dart format`)
+     - ✅ Static analysis (`flutter analyze`)
+     - ✅ Tests (`flutter test`)
+   - Fix any failing checks before requesting review
+
+6. **Review Process:**
+   - Your PR will be reviewed against the `develop` branch
+   - Address any feedback or requested changes
+   - Once approved, your PR will be merged into `develop`
+
 ## Tips
 
 1. **Start with Task 1** - Get create working first, then move to update
@@ -308,6 +369,8 @@ All tests must pass for CI to succeed.
 6. **Design thoughtfully** - Consider UX best practices for forms
 7. **Check CI** - Make sure your code passes CI checks before finishing
 8. **Review models** - Check `SalesInvoiceModel` to understand all available fields
+9. **Work carefully** - Take your time to understand the codebase before implementing
+10. **Ask questions** - Don't hesitate to ask for clarification during the session
 
 ## Questions?
 

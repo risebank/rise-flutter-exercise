@@ -67,7 +67,7 @@ final salesInvoiceCreatorProvider =
 
 typedef _$SalesInvoiceCreator = AutoDisposeAsyncNotifier<SalesInvoiceModel?>;
 String _$updateSalesInvoiceHash() =>
-    r'4c5d614cabd5c2fff0761100b9ce1cbbf0d54797';
+    r'ed3a35094a805c05bf00c27f7df28dc434026fa0';
 
 /// See also [UpdateSalesInvoice].
 @ProviderFor(UpdateSalesInvoice)

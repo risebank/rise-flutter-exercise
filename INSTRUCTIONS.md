@@ -121,9 +121,11 @@ lib/
 4. Parse the response and return `ApiResponse<SalesInvoiceModel>`
 5. Handle errors appropriately
 6. Design and implement a UI screen for creating invoices
-7. Connect the UI to the service method via the provider
-8. Show success/error messages to the user
-9. Navigate appropriately after successful creation
+7. Add a route in `main.dart` for the create screen (e.g., `/sales-invoices/create`)
+8. Add navigation to the create screen (e.g., a FloatingActionButton on the list screen or a button in the AppBar)
+9. Connect the UI to the service method via the provider (`SalesInvoiceCreator`)
+10. Show success/error messages to the user
+11. Navigate appropriately after successful creation (e.g., back to list or to detail view)
 
 **Hints:**
 - Look at `fetchSalesInvoices` for endpoint pattern
@@ -164,10 +166,12 @@ lib/
 4. Parse the response and return `ApiResponse<SalesInvoiceModel>`
 5. Handle errors appropriately
 6. Design and implement a UI screen for updating invoices
-7. Connect the UI to the service method via the provider
-8. Show success/error messages to the user
-9. Navigate appropriately after successful update
-10. Pre-populate the form with existing invoice data
+7. Add a route in `main.dart` for the edit screen (e.g., `/sales-invoices/:invoiceId/edit`)
+8. Add navigation to the edit screen (e.g., an "Edit" button in the detail screen's AppBar)
+9. Connect the UI to the service method via the provider (`UpdateSalesInvoice`)
+10. Show success/error messages to the user
+11. Navigate appropriately after successful update (e.g., back to detail view)
+12. Pre-populate the form with existing invoice data
 
 **Hints:**
 - Look at `fetchSalesInvoiceById` for endpoint pattern
@@ -207,7 +211,7 @@ The application reads from environment variables first, then falls back to defau
 ## API Endpoints Reference
 
 ### Base URL
-The base URL is configured in `.env.dev` file as `API_BASE_URL` (development environment).
+The base URL is configured via environment variables (see Environment Configuration section above). The application uses fallback values by default, which are configured for the test environment.
 
 ### Authentication
 All API calls require authentication via Bearer token (handled automatically by `AuthInterceptor`).

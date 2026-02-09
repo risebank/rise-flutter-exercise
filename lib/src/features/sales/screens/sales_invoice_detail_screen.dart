@@ -46,11 +46,18 @@ class _SalesInvoiceDetailScreenState
       _companyId = authService.getCurrentCompanyId();
     }
 
-    // Fallback value if still null (should not happen in normal operation)
-    // This should only occur if WhoAmI endpoint fails and cache is empty
-    _companyId ??= 'company-123';
+    // If we still don't have a company ID, show an error
+    // This should not happen in normal operation - indicates a configuration issue
+    if (_companyId == null || _companyId!.isEmpty) {
+      if (mounted) {
+        setState(() {
+          // Error will be shown by the provider state
+        });
+      }
+      return;
+    }
 
-    if (_companyId != null && _companyId!.isNotEmpty && mounted) {
+    if (mounted) {
       ref
           .read(selectedSalesInvoiceProvider.notifier)
           .fetchSalesInvoice(context, _companyId!, widget.invoiceId);

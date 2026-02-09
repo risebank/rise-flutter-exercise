@@ -37,6 +37,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return SalesInvoiceDetailScreen(invoiceId: invoiceId);
         },
       ),
+      // TODO: Task 1 - Add route for create invoice screen (e.g., '/sales-invoices/create')
+      // TODO: Task 2 - Add route for edit invoice screen (e.g., '/sales-invoices/:invoiceId/edit')
     ],
     redirect: (context, state) async {
       try {

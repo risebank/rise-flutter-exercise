@@ -8,16 +8,18 @@ import 'package:rise_flutter_exercise/src/features/sales/widgets/sales_invoice_f
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
 import 'package:rise_flutter_exercise/src/globals/utils/error_messages.dart';
 
-class SalesInvoiceCreateScreen extends ConsumerStatefulWidget {
-  const SalesInvoiceCreateScreen({super.key});
+class SalesInvoiceEditScreen extends ConsumerStatefulWidget {
+  final String invoiceId;
+
+  const SalesInvoiceEditScreen({super.key, required this.invoiceId});
 
   @override
-  ConsumerState<SalesInvoiceCreateScreen> createState() =>
-      _SalesInvoiceCreateScreenState();
+  ConsumerState<SalesInvoiceEditScreen> createState() =>
+      _SalesInvoiceEditScreenState();
 }
 
-class _SalesInvoiceCreateScreenState
-    extends ConsumerState<SalesInvoiceCreateScreen> {
+class _SalesInvoiceEditScreenState
+    extends ConsumerState<SalesInvoiceEditScreen> {
   String? _companyId;
   bool _isLoadingCompany = true;
   final Map<String, String> _recipientOptions = const {
@@ -29,16 +31,11 @@ class _SalesInvoiceCreateScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadCompanyId();
+      _loadCompanyIdAndFetch();
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> _loadCompanyId() async {
+  Future<void> _loadCompanyIdAndFetch() async {
     final authService = AuthService();
     _companyId = authService.getCurrentCompanyId();
 
@@ -48,6 +45,12 @@ class _SalesInvoiceCreateScreenState
       if (extractedCompanyId != null && extractedCompanyId.isNotEmpty) {
         _companyId = extractedCompanyId;
       }
+    }
+
+    if (_companyId != null && _companyId!.isNotEmpty && mounted) {
+      await ref
+          .read(selectedSalesInvoiceProvider.notifier)
+          .fetchSalesInvoice(context, _companyId!, widget.invoiceId);
     }
 
     if (mounted) {
@@ -62,24 +65,27 @@ class _SalesInvoiceCreateScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              ErrorMessages.fetchError(context, 'company info'),
-            ),
+            content: Text(ErrorMessages.fetchError(context, 'company info')),
           ),
         );
       }
       return;
     }
 
-    final created = await ref
-        .read(salesInvoiceCreatorProvider.notifier)
-        .createSalesInvoice(context, _companyId!, invoice);
+    final updated = await ref
+        .read(updateSalesInvoiceProvider.notifier)
+        .updateSalesInvoice(
+          context,
+          _companyId!,
+          widget.invoiceId,
+          invoice,
+        );
 
     if (!mounted) {
       return;
     }
 
-    if (created != null) {
+    if (updated != null) {
       final theme = Theme.of(context);
       final riseTheme = theme.extension<RiseAppThemeExtension>();
       final colors = riseTheme?.config.colors;
@@ -94,7 +100,7 @@ class _SalesInvoiceCreateScreenState
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  ErrorMessages.createSuccess(context, 'Sales invoice'),
+                  ErrorMessages.updateSuccess(context, 'Sales invoice'),
                   style: textTheme.bodyMedium?.copyWith(
                     color: colors?.onSuccess,
                     fontWeight: FontWeight.w600,
@@ -108,7 +114,10 @@ class _SalesInvoiceCreateScreenState
       await ref
           .read(salesInvoicesProvider.notifier)
           .fetchSalesInvoices(context, _companyId!);
-      context.go('/sales-invoices');
+      await ref
+          .read(selectedSalesInvoiceProvider.notifier)
+          .fetchSalesInvoice(context, _companyId!, widget.invoiceId);
+      context.pop();
     }
   }
 
@@ -118,13 +127,14 @@ class _SalesInvoiceCreateScreenState
     final riseTheme = theme.extension<RiseAppThemeExtension>();
     final colors = riseTheme?.config.colors;
     final textTheme = theme.textTheme;
-    final createState = ref.watch(salesInvoiceCreatorProvider);
+    final invoiceState = ref.watch(selectedSalesInvoiceProvider);
+    final updateState = ref.watch(updateSalesInvoiceProvider);
 
     return Scaffold(
       backgroundColor: colors?.background,
       appBar: AppBar(
         title: Text(
-          'Create Invoice',
+          'Edit Invoice',
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         leading: IconButton(
@@ -135,19 +145,44 @@ class _SalesInvoiceCreateScreenState
         elevation: 0,
       ),
       body: _isLoadingCompany
-          ? Center(
-              child: CircularProgressIndicator(color: colors?.primary),
-            )
-          : SalesInvoiceForm(
-              initialInvoice: null,
-              recipientOptions: _recipientOptions,
-              showRecipientFields: true,
-              showExtendedFields: true,
-              isSubmitting: createState.isLoading,
-              submitLabel: 'Create invoice',
-              errorText:
-                  createState.hasError ? createState.error.toString() : null,
-              onSubmit: _submit,
+          ? Center(child: CircularProgressIndicator(color: colors?.primary))
+          : invoiceState.when(
+              data: (invoice) {
+                if (invoice == null) {
+                  return Center(
+                    child: Text(
+                      'Invoice not found',
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colors?.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                }
+                return SalesInvoiceForm(
+                  initialInvoice: invoice,
+                  recipientOptions: _recipientOptions,
+                  showRecipientFields: false,
+                  showExtendedFields: false,
+                  isSubmitting: updateState.isLoading,
+                  submitLabel: 'Save changes',
+                  errorText: updateState.hasError
+                      ? updateState.error.toString()
+                      : null,
+                  onSubmit: _submit,
+                );
+              },
+              loading: () =>
+                  Center(child: CircularProgressIndicator(color: colors?.primary)),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    error.toString(),
+                    style: textTheme.bodyMedium?.copyWith(color: colors?.error),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
             ),
     );
   }

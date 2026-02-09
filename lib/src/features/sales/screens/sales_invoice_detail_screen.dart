@@ -99,6 +99,14 @@ class _SalesInvoiceDetailScreenState
         // TODO: Task 2 - Add navigation to edit screen if needed
         // The design and implementation of the edit functionality is up to you
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () =>
+            context.push('/sales-invoices/${widget.invoiceId}/edit'),
+        tooltip: 'Edit invoice',
+        backgroundColor: colors?.primary,
+        foregroundColor: colors?.onPrimary,
+        child: const Icon(Icons.edit),
+      ),
       body: invoiceState.when(
         data: (invoice) {
           if (invoice == null) {

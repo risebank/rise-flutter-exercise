@@ -53,14 +53,6 @@ class SalesService {
       context: context,
     );
 
-    debugPrint(
-      '🔎 [SalesService.fetchSalesInvoiceById] '
-      'success=${response.success} '
-      'status=${response.statusCode} '
-      'message=${response.message} '
-      'data=${response.data}',
-    );
-
     return ApiResponse.fromApiClientResponse(
       context,
       response,
@@ -84,70 +76,22 @@ class SalesService {
       companyId,
     );
 
-    final payload = Map<String, dynamic>.from(invoice.toJson());
-    payload.remove('id');
-    payload.remove('created_at');
-    payload.remove('updated_at');
-    payload.remove('status');
-    payload.remove('gross_amount');
-    payload.remove('vat_amount');
-    payload.remove('journal_number');
-
-    // Keep recipient as nested object with just id (remove name/email if null)
-    final recipient = payload['recipient'];
-    if (recipient is RecipientModel) {
-      payload['recipient'] = recipient.toJson();
-    }
-    if (payload['recipient'] is Map<String, dynamic>) {
-      final recipientMap =
-          Map<String, dynamic>.from(payload['recipient'] as Map);
-      // Remove null fields from recipient, keep only id
-      recipientMap.removeWhere((key, value) => value == null);
-      if (recipientMap.isNotEmpty) {
-        payload['recipient'] = recipientMap;
-      } else {
-        payload.remove('recipient');
-      }
-    }
-
-    if (payload['lines'] is List) {
-      payload['lines'] = (payload['lines'] as List)
-          .map((line) {
-            if (line is InvoiceLineModel) {
-              return line.toJson();
-            }
-            if (line is Map<String, dynamic>) {
-              return Map<String, dynamic>.from(line);
-            }
-            return null;
-          })
-          .where((line) => line != null)
-          .map((line) {
-            final map = Map<String, dynamic>.from(line as Map);
-            map.remove('id');
-            return map;
-          })
-          .toList();
-    }
-
-    final cleanedPayload = _removeNulls(payload);
-    _normalizeNumericStrings(cleanedPayload);
-    debugPrint(
-      '🧾 [SalesService.createSalesInvoice] payload=$cleanedPayload',
+    final cleanedPayload = _buildInvoicePayload(
+      invoice,
+      allowedKeys: {
+        'description',
+        'invoice_date',
+        'due_date',
+        'document_date',
+        'our_reference',
+        'your_reference',
+        'lines',
+      },
     );
-
     final response = await _apiClient.post<Map<String, dynamic>>(
       endpoint,
       data: cleanedPayload,
       context: context,
-    );
-
-    debugPrint(
-      '✅ [SalesService.createSalesInvoice] '
-      'success=${response.success} '
-      'status=${response.statusCode} '
-      'message=${response.message} '
-      'data=${response.data}',
     );
 
     return ApiResponse.fromApiClientResponse(
@@ -247,10 +191,98 @@ class SalesService {
     String invoiceId,
     SalesInvoiceModel invoice,
   ) async {
-    // TODO: Task 2 - Implement PATCH request to update sales invoice
-    throw UnimplementedError(
-      'updateSalesInvoice is not yet implemented. '
-      'This is Task 2 of the exercise - please implement the PATCH endpoint.',
+    final endpoint = Endpoints.salesInvoiceById(companyId, invoiceId);
+    final cleanedPayload = _buildInvoicePayload(
+      invoice,
+      allowedKeys: {
+        'description',
+        'lines',
+        'invoice_date',
+        'due_date',
+        'currency',
+      },
     );
+    final response = await _apiClient.patch<Map<String, dynamic>>(
+      endpoint,
+      data: cleanedPayload,
+      context: context,
+    );
+
+    return ApiResponse.fromApiClientResponse(
+      context,
+      response,
+      parser: (json) =>
+          SalesInvoiceModel.fromJson(json as Map<String, dynamic>),
+      errorMessage: ErrorMessages.updateError(context, 'sales invoice'),
+    );
+  }
+
+  Map<String, dynamic> _buildInvoicePayload(
+    SalesInvoiceModel invoice, {
+    Set<String>? allowedKeys,
+  }) {
+    final payload = Map<String, dynamic>.from(invoice.toJson());
+    payload.remove('id');
+    payload.remove('created_at');
+    payload.remove('updated_at');
+    payload.remove('status');
+    payload.remove('gross_amount');
+    payload.remove('vat_amount');
+    payload.remove('journal_number');
+
+    final recipient = payload['recipient'];
+    if (recipient is RecipientModel) {
+      payload['recipient'] = recipient.toJson();
+    }
+    if (payload['recipient'] is Map<String, dynamic>) {
+      final recipientMap =
+          Map<String, dynamic>.from(payload['recipient'] as Map);
+      recipientMap.removeWhere((key, value) => value == null);
+      if (recipientMap['id'] != null) {
+        payload['recipientid'] = recipientMap['id'];
+        payload.remove('recipient');
+      } else if (recipientMap.isNotEmpty) {
+        payload['recipient'] = recipientMap;
+      } else {
+        payload.remove('recipient');
+      }
+    }
+
+    final invoicingAddress = payload['recipient_invoicing_address'];
+    if (invoicingAddress is AddressModel) {
+      payload['recipient_invoicing_address'] = invoicingAddress.toJson();
+    }
+    final senderAddress = payload['sender_address'];
+    if (senderAddress is AddressModel) {
+      payload['sender_address'] = senderAddress.toJson();
+    }
+
+    if (payload['lines'] is List) {
+      payload['lines'] = (payload['lines'] as List)
+          .map((line) {
+            if (line is InvoiceLineModel) {
+              return line.toJson();
+            }
+            if (line is Map<String, dynamic>) {
+              return Map<String, dynamic>.from(line);
+            }
+            return null;
+          })
+          .where((line) => line != null)
+          .map((line) {
+            final map = Map<String, dynamic>.from(line as Map);
+            map.remove('id');
+            return map;
+          })
+          .toList();
+    }
+
+    final cleanedPayload = _removeNulls(payload);
+    _normalizeNumericStrings(cleanedPayload);
+    if (allowedKeys == null) {
+      return cleanedPayload;
+    }
+    cleanedPayload.removeWhere((key, _) => !allowedKeys.contains(key));
+    return cleanedPayload;
   }
 }

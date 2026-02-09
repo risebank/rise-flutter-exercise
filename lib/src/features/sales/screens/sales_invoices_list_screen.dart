@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
+import 'package:rise_flutter_exercise/src/features/sales/widgets/invoice_list_item.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
 import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
+import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
 
 class SalesInvoicesListScreen extends ConsumerStatefulWidget {
   const SalesInvoicesListScreen({super.key});
@@ -103,14 +105,26 @@ class _SalesInvoicesListScreenState
   @override
   Widget build(BuildContext context) {
     final invoicesState = ref.watch(salesInvoicesProvider);
+    final theme = Theme.of(context);
+    final riseTheme = theme.extension<RiseAppThemeExtension>();
+    final colors = riseTheme?.config.colors;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
+      backgroundColor: colors?.background,
       appBar: AppBar(
-        title: const Text('Sales Invoices'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(
+          'Sales Invoices',
+          style: textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: colors?.surfaceContainerLowest,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: colors?.onSurface),
+            tooltip: 'Logout',
             onPressed: () async {
               await ref.read(authProvider.notifier).logout(context);
               if (context.mounted) {
@@ -123,108 +137,96 @@ class _SalesInvoicesListScreenState
       body: invoicesState.when(
         data: (invoices) {
           if (invoices.isEmpty) {
-            return const Center(child: Text('No sales invoices found'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 64,
+                    color: colors?.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No sales invoices found',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: colors?.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
-          return ListView.builder(
-            itemCount: invoices.length,
-            itemBuilder: (context, index) {
-              final invoice = invoices[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  title: Text(
-                    invoice.description ?? 'Invoice ${invoice.id}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (invoice.recipient?.name != null)
-                        Text('Customer: ${invoice.recipient!.name}'),
-                      if (invoice.invoiceDate != null)
-                        Text('Date: ${invoice.invoiceDate}'),
-                      if (invoice.status != null)
-                        Text('Status: ${invoice.status}'),
-                    ],
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (invoice.grossAmount != null)
-                        Text(
-                          '€${invoice.grossAmount}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      if (invoice.status != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(invoice.status!),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            invoice.status!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  onTap: () {
-                    if (_companyId != null) {
-                      context.go('/sales-invoices/${invoice.id}');
-                    }
-                  },
-                ),
-              );
+          return RefreshIndicator(
+            onRefresh: () async {
+              if (_companyId != null) {
+                await ref
+                    .read(salesInvoicesProvider.notifier)
+                    .fetchSalesInvoices(context, _companyId!);
+              }
             },
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: invoices.length,
+              itemBuilder: (context, index) {
+                final invoice = invoices[index];
+                return InvoiceListItem(
+                  invoice: invoice,
+                  companyId: _companyId ?? '',
+                );
+              },
+            ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: colors?.primary,
+          ),
+        ),
         error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Error: $error',
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  _loadCompanyIdAndFetch();
-                },
-                child: const Text('Retry'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: colors?.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load invoices',
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colors?.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colors?.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _loadCompanyIdAndFetch();
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors?.primary,
+                    foregroundColor: colors?.onPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'draft':
-        return Colors.grey;
-      case 'sent':
-        return Colors.blue;
-      case 'paid':
-        return Colors.green;
-      case 'overdue':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }

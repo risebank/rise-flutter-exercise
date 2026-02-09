@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
+import 'package:rise_flutter_exercise/src/globals/widgets/rise_card.dart';
+import 'package:rise_flutter_exercise/src/globals/widgets/rise_info_row.dart';
+import 'package:rise_flutter_exercise/src/globals/widgets/rise_section_header.dart';
+import 'package:rise_flutter_exercise/src/globals/widgets/rise_status_badge.dart';
+import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
 
 class SalesInvoiceDetailScreen extends ConsumerStatefulWidget {
   final String invoiceId;
@@ -59,21 +65,42 @@ class _SalesInvoiceDetailScreenState
   @override
   Widget build(BuildContext context) {
     final invoiceState = ref.watch(selectedSalesInvoiceProvider);
+    final theme = Theme.of(context);
+    final riseTheme = theme.extension<RiseAppThemeExtension>();
+    final colors = riseTheme?.config.colors;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
+      backgroundColor: colors?.background,
       appBar: AppBar(
-        title: const Text('Invoice Details'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colors?.onSurface),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          'Invoice Details',
+          style: textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: colors?.surfaceContainerLowest,
+        elevation: 0,
         actions: [
           // TODO: Stage 2 - Add edit button that navigates to edit screen
-          // For now, this is just a placeholder
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: Icon(Icons.edit, color: colors?.onSurface),
+            tooltip: 'Edit',
             onPressed: () {
               // TODO: Stage 2 - Navigate to edit screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Edit functionality - Stage 2 TODO'),
+                SnackBar(
+                  content: Text(
+                    'Edit functionality - Stage 2 TODO',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colors?.onErrorContainer,
+                    ),
+                  ),
+                  backgroundColor: colors?.errorContainer,
                 ),
               );
             },
@@ -83,223 +110,334 @@ class _SalesInvoiceDetailScreenState
       body: invoiceState.when(
         data: (invoice) {
           if (invoice == null) {
-            return const Center(child: Text('Invoice not found'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 64,
+                    color: colors?.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Invoice not found',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: colors?.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSection('Invoice Information', [
-                  _buildInfoRow('ID', invoice.id ?? 'N/A'),
-                  _buildInfoRow('Status', invoice.status ?? 'N/A'),
-                  _buildInfoRow('Invoice Date', invoice.invoiceDate ?? 'N/A'),
-                  _buildInfoRow('Due Date', invoice.dueDate ?? 'N/A'),
-                  _buildInfoRow('Document Date', invoice.documentDate ?? 'N/A'),
-                  if (invoice.journalNumber != null)
-                    _buildInfoRow(
-                      'Journal Number',
-                      invoice.journalNumber.toString(),
+                // Status badge at top
+                if (invoice.status != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: RiseStatusBadge(status: invoice.status!),
+                  ),
+                _buildSection(
+                  context,
+                  'Invoice Information',
+                  [
+                    RiseInfoRow(label: 'ID', value: invoice.id ?? 'N/A'),
+                    if (invoice.status != null)
+                      RiseInfoRow(label: 'Status', value: invoice.status!),
+                    RiseInfoRow(
+                      label: 'Invoice Date',
+                      value: invoice.invoiceDate ?? 'N/A',
                     ),
-                ]),
+                    RiseInfoRow(
+                      label: 'Due Date',
+                      value: invoice.dueDate ?? 'N/A',
+                    ),
+                    RiseInfoRow(
+                      label: 'Document Date',
+                      value: invoice.documentDate ?? 'N/A',
+                    ),
+                    if (invoice.journalNumber != null)
+                      RiseInfoRow(
+                        label: 'Journal Number',
+                        value: invoice.journalNumber.toString(),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 24),
-                _buildSection('Description', [
-                  Text(invoice.description ?? 'No description'),
-                ]),
+                _buildSection(
+                  context,
+                  'Description',
+                  [
+                    Text(
+                      invoice.description ?? 'No description',
+                      style: textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 24),
                 if (invoice.recipient != null)
-                  _buildSection('Recipient', [
-                    _buildInfoRow('Name', invoice.recipient!.name ?? 'N/A'),
-                    _buildInfoRow('Email', invoice.recipient!.email ?? 'N/A'),
-                  ]),
+                  _buildSection(
+                    context,
+                    'Recipient',
+                    [
+                      RiseInfoRow(
+                        label: 'Name',
+                        value: invoice.recipient!.name ?? 'N/A',
+                      ),
+                      RiseInfoRow(
+                        label: 'Email',
+                        value: invoice.recipient!.email ?? 'N/A',
+                      ),
+                    ],
+                  ),
                 if (invoice.recipientInvoicingEmail != null) ...[
                   const SizedBox(height: 24),
-                  _buildSection('Invoicing Email', [
-                    Text(invoice.recipientInvoicingEmail!),
-                  ]),
+                  _buildSection(
+                    context,
+                    'Invoicing Email',
+                    [
+                      Text(
+                        invoice.recipientInvoicingEmail!,
+                        style: textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
                 ],
                 if (invoice.recipientInvoicingAddress != null) ...[
                   const SizedBox(height: 24),
-                  _buildSection('Invoicing Address', [
-                    _buildInfoRow(
-                      'Street',
-                      invoice.recipientInvoicingAddress!.street?.join(', ') ?? 'N/A',
-                    ),
-                    _buildInfoRow(
-                      'City',
-                      invoice.recipientInvoicingAddress!.city ?? 'N/A',
-                    ),
-                    _buildInfoRow(
-                      'Postal Code',
-                      invoice.recipientInvoicingAddress!.postalCode ?? 'N/A',
-                    ),
-                    _buildInfoRow(
-                      'Region',
-                      invoice.recipientInvoicingAddress!.region ?? 'N/A',
-                    ),
-                    _buildInfoRow(
-                      'Country',
-                      invoice.recipientInvoicingAddress!.countryCode ?? 'N/A',
-                    ),
-                  ]),
+                  _buildSection(
+                    context,
+                    'Invoicing Address',
+                    [
+                      RiseInfoRow(
+                        label: 'Street',
+                        value: invoice.recipientInvoicingAddress!.street
+                                ?.join(', ') ??
+                            'N/A',
+                      ),
+                      RiseInfoRow(
+                        label: 'City',
+                        value: invoice.recipientInvoicingAddress!.city ?? 'N/A',
+                      ),
+                      RiseInfoRow(
+                        label: 'Postal Code',
+                        value:
+                            invoice.recipientInvoicingAddress!.postalCode ?? 'N/A',
+                      ),
+                      RiseInfoRow(
+                        label: 'Region',
+                        value:
+                            invoice.recipientInvoicingAddress!.region ?? 'N/A',
+                      ),
+                      RiseInfoRow(
+                        label: 'Country',
+                        value: invoice.recipientInvoicingAddress!.countryCode ??
+                            'N/A',
+                      ),
+                    ],
+                  ),
                 ],
                 const SizedBox(height: 24),
-                _buildSection('References', [
-                  _buildInfoRow('Our Reference', invoice.ourReference ?? 'N/A'),
-                  _buildInfoRow(
-                    'Your Reference',
-                    invoice.yourReference ?? 'N/A',
-                  ),
-                ]),
+                _buildSection(
+                  context,
+                  'References',
+                  [
+                    RiseInfoRow(
+                      label: 'Our Reference',
+                      value: invoice.ourReference ?? 'N/A',
+                    ),
+                    RiseInfoRow(
+                      label: 'Your Reference',
+                      value: invoice.yourReference ?? 'N/A',
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 24),
                 _buildSection(
+                  context,
                   'Invoice Lines',
                   invoice.lines.isEmpty
-                      ? [const Text('No invoice lines')]
+                      ? [
+                          Text(
+                            'No invoice lines',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colors?.onSurfaceVariant,
+                            ),
+                          ),
+                        ]
                       : invoice.lines.map((line) {
-                          return Card(
+                          return RiseCard(
                             margin: const EdgeInsets.only(bottom: 8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (line.description != null)
-                                    Text(
-                                      line.description!,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (line.description != null)
+                                  Text(
+                                    line.description!,
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    if (line.quantity != null)
+                                      Text(
+                                        'Qty: ${line.quantity}',
+                                        style: textTheme.bodyMedium,
+                                      ),
+                                    if (line.unitPrice != null)
+                                      Text(
+                                        'Price: €${line.unitPrice}',
+                                        style: textTheme.bodyMedium,
+                                      ),
+                                    if (line.amount != null)
+                                      Text(
+                                        'Amount: €${line.amount}',
+                                        style: textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (line.vatRate != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Text(
+                                      'VAT: ${line.vatRate}%',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: colors?.onSurfaceVariant,
                                       ),
                                     ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      if (line.quantity != null)
-                                        Text('Qty: ${line.quantity}'),
-                                      if (line.unitPrice != null)
-                                        Text('Price: €${line.unitPrice}'),
-                                      if (line.amount != null)
-                                        Text(
-                                          'Amount: €${line.amount}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                    ],
                                   ),
-                                  if (line.vatRate != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4),
-                                      child: Text('VAT: ${line.vatRate}%'),
-                                    ),
-                                ],
-                              ),
+                              ],
                             ),
                           );
                         }).toList(),
                 ),
                 const SizedBox(height: 24),
-                _buildSection('Totals', [
-                  if (invoice.grossAmount != null)
-                    _buildInfoRow(
-                      'Gross Amount',
-                      '€${invoice.grossAmount}',
-                      isBold: true,
-                    ),
-                  if (invoice.vatAmount != null)
-                    _buildInfoRow(
-                      'VAT Amount',
-                      '€${invoice.vatAmount}',
-                      isBold: true,
-                    ),
-                ]),
+                _buildSection(
+                  context,
+                  'Totals',
+                  [
+                    if (invoice.grossAmount != null)
+                      RiseInfoRow(
+                        label: 'Gross Amount',
+                        value: '€${invoice.grossAmount}',
+                        isBold: true,
+                      ),
+                    if (invoice.vatAmount != null)
+                      RiseInfoRow(
+                        label: 'VAT Amount',
+                        value: '€${invoice.vatAmount}',
+                        isBold: true,
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 24),
-                _buildSection('Metadata', [
-                  _buildInfoRow('Currency', invoice.currency ?? 'N/A'),
-                  _buildInfoRow(
-                    'Invoicing Channel',
-                    invoice.invoicingChannel ?? 'N/A',
-                  ),
-                  if (invoice.paymentTerm != null)
-                    _buildInfoRow(
-                      'Payment Term',
-                      '${invoice.paymentTerm} days',
+                _buildSection(
+                  context,
+                  'Metadata',
+                  [
+                    RiseInfoRow(
+                      label: 'Currency',
+                      value: invoice.currency ?? 'N/A',
                     ),
-                  if (invoice.createdAt != null)
-                    _buildInfoRow('Created At', invoice.createdAt!),
-                  if (invoice.updatedAt != null)
-                    _buildInfoRow('Updated At', invoice.updatedAt!),
-                ]),
+                    RiseInfoRow(
+                      label: 'Invoicing Channel',
+                      value: invoice.invoicingChannel ?? 'N/A',
+                    ),
+                    if (invoice.paymentTerm != null)
+                      RiseInfoRow(
+                        label: 'Payment Term',
+                        value: '${invoice.paymentTerm} days',
+                      ),
+                    if (invoice.createdAt != null)
+                      RiseInfoRow(
+                        label: 'Created At',
+                        value: invoice.createdAt!,
+                      ),
+                    if (invoice.updatedAt != null)
+                      RiseInfoRow(
+                        label: 'Updated At',
+                        value: invoice.updatedAt!,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 32),
               ],
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: colors?.primary,
+          ),
+        ),
         error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Error: $error',
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  _loadCompanyIdAndFetch();
-                },
-                child: const Text('Retry'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: colors?.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load invoice',
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colors?.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colors?.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _loadCompanyIdAndFetch();
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors?.primary,
+                    foregroundColor: colors?.onPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children) {
+  Widget _buildSection(
+    BuildContext context,
+    String title,
+    List<Widget> children,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
+        RiseSectionHeader(title: title),
         ...children,
       ],
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value, {bool isBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

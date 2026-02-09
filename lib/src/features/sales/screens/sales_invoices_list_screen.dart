@@ -198,6 +198,10 @@ class _SalesInvoicesListScreenState
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).pushNamed('/sales-invoices/create'),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

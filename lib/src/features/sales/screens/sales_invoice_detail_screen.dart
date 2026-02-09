@@ -95,7 +95,8 @@ class _SalesInvoiceDetailScreenState
           IconButton(
             icon: Icon(Icons.edit, color: colors?.onSurface),
             tooltip: 'Edit invoice',
-            onPressed: () => context.go('/sales-invoices/${widget.invoiceId}/edit'),
+            onPressed: () =>
+                context.go('/sales-invoices/${widget.invoiceId}/edit'),
           ),
         ],
       ),

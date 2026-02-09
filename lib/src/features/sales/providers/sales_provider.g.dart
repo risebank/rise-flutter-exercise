@@ -6,7 +6,7 @@ part of 'sales_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$salesInvoicesHash() => r'24c51185fc23d723efc45d028f525df085d2e705';
+String _$salesInvoicesHash() => r'8262b9ae98a647484d8322137e2441f1baed880b';
 
 /// See also [SalesInvoices].
 @ProviderFor(SalesInvoices)
@@ -27,7 +27,7 @@ final salesInvoicesProvider =
 typedef _$SalesInvoices =
     AutoDisposeAsyncNotifier<List<SalesInvoiceListItemModel>>;
 String _$selectedSalesInvoiceHash() =>
-    r'9facff454a53c5429f813f25e98c56ba9a1ee75e';
+    r'23c137e23ef99ede882146b05890385c22df2976';
 
 /// See also [SelectedSalesInvoice].
 @ProviderFor(SelectedSalesInvoice)

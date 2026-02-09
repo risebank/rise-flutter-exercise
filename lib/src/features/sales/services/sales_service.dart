@@ -78,11 +78,10 @@ class SalesService {
 
     // Prepare and clean payload: remove read-only and null values recursively
     final raw = Map<String, dynamic>.from(invoice.toJson());
-    final payload = _preparePayload(raw, excludeKeys: {
-      'id',
-      'created_at',
-      'updated_at',
-    });
+    final payload = _preparePayload(
+      raw,
+      excludeKeys: {'id', 'created_at', 'updated_at'},
+    );
 
     final response = await _apiClient.post<Map<String, dynamic>>(
       endpoint,
@@ -100,8 +99,10 @@ class SalesService {
   }
 
   // Helper to clean payloads: removes excluded keys, nulls, and empty containers
-  Map<String, dynamic> _preparePayload(Map<String, dynamic> input,
-      {required Set<String> excludeKeys}) {
+  Map<String, dynamic> _preparePayload(
+    Map<String, dynamic> input, {
+    required Set<String> excludeKeys,
+  }) {
     Map<String, dynamic> cleanMap(Map<String, dynamic> m) {
       final result = <String, dynamic>{};
 
@@ -150,14 +151,17 @@ class SalesService {
 
     // Prepare and clean payload: remove read-only and null values recursively
     final raw = Map<String, dynamic>.from(invoice.toJson());
-    final payload = _preparePayload(raw, excludeKeys: {
-      'id',
-      'created_at',
-      'updated_at',
-      'journal_number',
-      'status',
-      'payment_term',
-    });
+    final payload = _preparePayload(
+      raw,
+      excludeKeys: {
+        'id',
+        'created_at',
+        'updated_at',
+        'journal_number',
+        'status',
+        'payment_term',
+      },
+    );
 
     final response = await _apiClient.patch<Map<String, dynamic>>(
       endpoint,

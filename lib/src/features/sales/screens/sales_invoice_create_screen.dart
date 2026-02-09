@@ -46,9 +46,9 @@ class _SalesInvoiceCreateScreenState
     if (!_formKey.currentState!.validate()) return;
 
     if (_companyId == null || _companyId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Company ID not available')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Company ID not available')));
       return;
     }
 
@@ -62,7 +62,11 @@ class _SalesInvoiceCreateScreenState
 
     final creator = ref.read(salesInvoiceCreatorProvider.notifier);
 
-    final result = await creator.createSalesInvoice(context, _companyId!, invoice);
+    final result = await creator.createSalesInvoice(
+      context,
+      _companyId!,
+      invoice,
+    );
 
     if (result != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,10 +76,12 @@ class _SalesInvoiceCreateScreenState
       context.go('/sales-invoices');
     } else {
       final state = ref.read(salesInvoiceCreatorProvider);
-      final message = state.hasError ? state.asError!.error.toString() : 'Failed to create invoice';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      final message = state.hasError
+          ? state.asError!.error.toString()
+          : 'Failed to create invoice';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -103,7 +109,8 @@ class _SalesInvoiceCreateScreenState
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -112,10 +119,7 @@ class _SalesInvoiceCreateScreenState
                 validator: (v) => v == null || v.trim().isEmpty ? null : null,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _submit,
-                child: const Text('Create'),
-              ),
+              ElevatedButton(onPressed: _submit, child: const Text('Create')),
             ],
           ),
         ),

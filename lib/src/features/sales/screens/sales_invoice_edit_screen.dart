@@ -16,7 +16,8 @@ class SalesInvoiceEditScreen extends ConsumerStatefulWidget {
       _SalesInvoiceEditScreenState();
 }
 
-class _SalesInvoiceEditScreenState extends ConsumerState<SalesInvoiceEditScreen> {
+class _SalesInvoiceEditScreenState
+    extends ConsumerState<SalesInvoiceEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _currencyController = TextEditingController();
@@ -28,7 +29,9 @@ class _SalesInvoiceEditScreenState extends ConsumerState<SalesInvoiceEditScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCompanyIdAndInvoice());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _loadCompanyIdAndInvoice(),
+    );
   }
 
   Future<void> _loadCompanyIdAndInvoice() async {
@@ -70,9 +73,9 @@ class _SalesInvoiceEditScreenState extends ConsumerState<SalesInvoiceEditScreen>
     if (!_formKey.currentState!.validate()) return;
 
     if (_companyId == null || _companyId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Company ID not available')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Company ID not available')));
       return;
     }
 
@@ -121,11 +124,12 @@ class _SalesInvoiceEditScreenState extends ConsumerState<SalesInvoiceEditScreen>
       context.go('/sales-invoices/${widget.invoiceId}');
     } else {
       final state = ref.read(updateSalesInvoiceProvider);
-      final message =
-          state.hasError ? state.asError!.error.toString() : 'Failed to update invoice';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      final message = state.hasError
+          ? state.asError!.error.toString()
+          : 'Failed to update invoice';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -150,9 +154,7 @@ class _SalesInvoiceEditScreenState extends ConsumerState<SalesInvoiceEditScreen>
           title: Text('Edit Invoice', style: textTheme.titleLarge),
           backgroundColor: colors?.surfaceContainerLowest,
         ),
-        body: Center(
-          child: CircularProgressIndicator(color: colors?.primary),
-        ),
+        body: Center(child: CircularProgressIndicator(color: colors?.primary)),
       );
     }
 
@@ -173,7 +175,8 @@ class _SalesInvoiceEditScreenState extends ConsumerState<SalesInvoiceEditScreen>
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -182,10 +185,7 @@ class _SalesInvoiceEditScreenState extends ConsumerState<SalesInvoiceEditScreen>
                 validator: (v) => v == null || v.trim().isEmpty ? null : null,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _submit,
-                child: const Text('Update'),
-              ),
+              ElevatedButton(onPressed: _submit, child: const Text('Update')),
             ],
           ),
         ),

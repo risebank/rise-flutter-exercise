@@ -135,11 +135,50 @@ class ErrorInterceptor extends Interceptor {
     safePrint('❌ [ErrorInterceptor] Error Type: ${err.type}');
     safePrint('❌ [ErrorInterceptor] Error Message: ${err.message}');
 
+    // Check for CORS-related errors
+    final isCorsError = err.type == DioExceptionType.unknown ||
+        (err.response == null && err.type != DioExceptionType.cancel) ||
+        err.message?.toLowerCase().contains('cors') == true ||
+        err.message?.toLowerCase().contains('access-control') == true;
+
+    if (isCorsError) {
+      safePrint('⚠️ [ErrorInterceptor] CORS error detected');
+      safePrint(
+        '⚠️ [ErrorInterceptor] This may be due to missing or incorrect '
+        'Access-Control-Allow-Headers in the backend response. '
+        'The Authorization header must be explicitly listed.',
+      );
+    }
+
     if (err.response != null) {
       safePrint('❌ [ErrorInterceptor] Response Data: ${err.response!.data}');
       safePrint(
         '❌ [ErrorInterceptor] Response Headers: ${err.response!.headers}',
       );
+      
+      // Check for CORS headers in response
+      final corsHeaders = {
+        'access-control-allow-origin': err.response!.headers.value('access-control-allow-origin'),
+        'access-control-allow-headers': err.response!.headers.value('access-control-allow-headers'),
+        'access-control-allow-methods': err.response!.headers.value('access-control-allow-methods'),
+      };
+      
+      if (corsHeaders.values.any((h) => h != null)) {
+        safePrint('📋 [ErrorInterceptor] CORS headers present: $corsHeaders');
+        
+        // Check if Authorization header is explicitly allowed
+        final allowHeaders = corsHeaders['access-control-allow-headers']?.toLowerCase() ?? '';
+        if (allowHeaders == '*' || allowHeaders.contains('authorization')) {
+          safePrint('✅ [ErrorInterceptor] Authorization header is allowed');
+        } else {
+          safePrint(
+            '⚠️ [ErrorInterceptor] Authorization header may not be explicitly allowed. '
+            'Backend should include "Authorization" in Access-Control-Allow-Headers.',
+          );
+        }
+      } else {
+        safePrint('⚠️ [ErrorInterceptor] No CORS headers found in response');
+      }
     } else {
       safePrint('❌ [ErrorInterceptor] No response received (network error?)');
     }

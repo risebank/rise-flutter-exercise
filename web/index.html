@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="rise_flutter_exercise">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>rise_flutter_exercise</title>
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Intl.Segmenter polyfill and deprecation warning suppression -->
+  <!-- This addresses the deprecation warning for Intl.v8BreakIterator -->
+  <!-- Note: The warning originates from Flutter's compiled dart_sdk.js, not our code -->
+  <!-- This is a known Flutter framework issue that will be resolved when Flutter migrates to Intl.Segmenter -->
+  <script>
+    (function() {
+      // Suppress the specific Intl.v8BreakIterator deprecation warning
+      // This warning comes from Flutter's compiled JavaScript (dart_sdk.js)
+      // and cannot be fixed in application code until Flutter migrates to Intl.Segmenter
+      const originalWarn = console.warn;
+      console.warn = function(...args) {
+        const message = args.join(' ');
+        // Suppress only the Intl.v8BreakIterator deprecation warning
+        if (message.includes('Intl.v8BreakIterator') && message.includes('deprecated')) {
+          // Silently ignore this specific deprecation warning
+          // It's a known Flutter framework issue, not an application issue
+          return;
+        }
+        // Allow all other warnings to pass through
+        originalWarn.apply(console, args);
+      };
+
+      // Check for Intl.Segmenter support and prepare for future Flutter migration
+      if (typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'undefined') {
+        // Log for debugging - actual polyfill can be added here when Flutter migrates
+        console.log('[Intl.Segmenter] Native support not available - ready for polyfill when needed');
+        // When Flutter migrates to Intl.Segmenter, uncomment and add polyfill:
+        // const script = document.createElement('script');
+        // script.src = 'https://cdn.jsdelivr.net/npm/intl-segmenter-polyfill@latest/dist/index.js';
+        // document.head.appendChild(script);
+      } else if (typeof Intl !== 'undefined' && typeof Intl.Segmenter !== 'undefined') {
+        console.log('[Intl.Segmenter] Native support available');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

@@ -27,14 +27,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController = _authNotifier.emailController;
     _passwordController = _authNotifier.passwordController;
 
-    // Clear any previous error state when entering the screen
-    // Use addPostFrameCallback to ensure it runs after the widget tree is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        // Use the stored notifier reference instead of ref.read()
-        _authNotifier.clearError();
-      }
-    });
+    // Don't clear errors automatically - let them persist so users can see what went wrong
+    // Errors will only be cleared when user explicitly tries to login again
 
     // Listen to text field changes for validation
     _emailController.addListener(_validateForm);
@@ -47,6 +41,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController.removeListener(_validateForm);
     _passwordController.removeListener(_validateForm);
     super.dispose();
+  }
+
+  String _formatErrorMessage(String error) {
+    // Extract user-friendly error message
+    // Remove technical details and provide clear feedback
+    if (error.toLowerCase().contains('incorrect username or password') ||
+        error.toLowerCase().contains('notauthorized')) {
+      return 'Incorrect email or password. Please check your credentials and try again.';
+    }
+    if (error.toLowerCase().contains('network') ||
+        error.toLowerCase().contains('connection')) {
+      return 'Network error. Please check your internet connection and try again.';
+    }
+    if (error.toLowerCase().contains('timeout')) {
+      return 'Request timed out. Please try again.';
+    }
+    // Return the error as-is if it's already user-friendly
+    return error;
   }
 
   void _validateForm() {
@@ -140,33 +152,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Rise Flutter Exercise',
-                    style: textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colors?.onSurface,
+              child: Form(
+                key: const ValueKey('login_form'),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Rise Flutter Exercise',
+                      style: textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors?.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sign in to continue',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colors?.onSurfaceVariant,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sign in to continue',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colors?.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
-                  TextField(
+                    const SizedBox(height: 48),
+                    TextField(
+                    key: const ValueKey('email_field'),
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     enabled: !authState.isLoading,
                     style: textTheme.bodyLarge,
                     onChanged: (_) => _validateForm(),
+                    autofillHints: const [AutofillHints.email],
+                    textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: textTheme.bodyMedium?.copyWith(
@@ -225,11 +242,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    key: const ValueKey('password_field'),
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     enabled: !authState.isLoading,
                     style: textTheme.bodyLarge,
                     onChanged: (_) => _validateForm(),
+                    autofillHints: const [AutofillHints.password],
+                    textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: textTheme.bodyMedium?.copyWith(
@@ -369,6 +389,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
                                 Icons.error_outline,
@@ -378,7 +399,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  error.toString(),
+                                  _formatErrorMessage(error.toString()),
                                   style: textTheme.bodyMedium?.copyWith(
                                     color: colors?.onErrorContainer,
                                   ),
@@ -422,7 +443,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                     ),
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

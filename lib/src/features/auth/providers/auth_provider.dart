@@ -17,6 +17,8 @@ class Auth extends _$Auth {
     _service = AuthService();
     // Just return getCurrentUser() - it will return null if not signed in
     // This matches rise-mobile-app's pattern and ensures auth state persists on page reload
+    // Note: This build method only runs on provider initialization or explicit invalidation
+    // Error states set via login() will persist until explicitly cleared
     safePrint('🔍 [AuthProvider] Initializing auth state...');
 
     // First check if user is signed in via Amplify session
@@ -113,7 +115,9 @@ class Auth extends _$Auth {
     emailController.clear();
     passwordController.clear();
     state = const AsyncValue.data(null);
-    ref.invalidate(whoAmIProvider);
+    // Note: whoAmIProvider automatically rebuilds when authProvider changes
+    // because it watches authProvider, so no need to invalidate manually
+    // Invalidating here would cause CircularDependencyError
   }
 
   void clearError() {

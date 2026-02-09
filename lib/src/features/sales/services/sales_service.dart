@@ -76,11 +76,13 @@ class SalesService {
       companyId,
     );
 
-    final payload = Map<String, dynamic>.from(invoice.toJson());
-    // Remove read-only fields
-    payload.remove('id');
-    payload.remove('created_at');
-    payload.remove('updated_at');
+    // Prepare and clean payload: remove read-only and null values recursively
+    final raw = Map<String, dynamic>.from(invoice.toJson());
+    final payload = _preparePayload(raw, excludeKeys: {
+      'id',
+      'created_at',
+      'updated_at',
+    });
 
     final response = await _apiClient.post<Map<String, dynamic>>(
       endpoint,
@@ -97,6 +99,43 @@ class SalesService {
     );
   }
 
+  // Helper to clean payloads: removes excluded keys, nulls, and empty containers
+  Map<String, dynamic> _preparePayload(Map<String, dynamic> input,
+      {required Set<String> excludeKeys}) {
+    Map<String, dynamic> cleanMap(Map<String, dynamic> m) {
+      final result = <String, dynamic>{};
+
+      m.forEach((key, value) {
+        if (excludeKeys.contains(key)) return;
+
+        if (value == null) return;
+
+        if (value is Map<String, dynamic>) {
+          final nested = cleanMap(value);
+          if (nested.isNotEmpty) result[key] = nested;
+        } else if (value is List) {
+          final cleanedList = <dynamic>[];
+          for (var item in value) {
+            if (item == null) continue;
+            if (item is Map<String, dynamic>) {
+              final nested = cleanMap(item);
+              if (nested.isNotEmpty) cleanedList.add(nested);
+            } else {
+              cleanedList.add(item);
+            }
+          }
+          if (cleanedList.isNotEmpty) result[key] = cleanedList;
+        } else {
+          result[key] = value;
+        }
+      });
+
+      return result;
+    }
+
+    return cleanMap(input);
+  }
+
   /// Update an existing sales invoice
   /// TODO: Task 2 - Implement this method
   /// Expected endpoint: PATCH /companies/{company_id}/sales-invoices/{invoice_id}
@@ -109,14 +148,16 @@ class SalesService {
   ) async {
     final endpoint = Endpoints.salesInvoiceById(companyId, invoiceId);
 
-    final payload = Map<String, dynamic>.from(invoice.toJson());
-    // Remove read-only fields
-    payload.remove('id');
-    payload.remove('created_at');
-    payload.remove('updated_at');
-    payload.remove('journal_number');
-    payload.remove('status');
-    payload.remove('payment_term');
+    // Prepare and clean payload: remove read-only and null values recursively
+    final raw = Map<String, dynamic>.from(invoice.toJson());
+    final payload = _preparePayload(raw, excludeKeys: {
+      'id',
+      'created_at',
+      'updated_at',
+      'journal_number',
+      'status',
+      'payment_term',
+    });
 
     final response = await _apiClient.patch<Map<String, dynamic>>(
       endpoint,

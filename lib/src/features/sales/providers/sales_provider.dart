@@ -8,11 +8,13 @@ part 'sales_provider.g.dart';
 @riverpod
 class SalesInvoices extends _$SalesInvoices {
   late final SalesService _service;
+  bool _hasAttemptedFetch = false;
 
   @override
   Future<List<SalesInvoiceListItemModel>> build() async {
     _service = SalesService();
-    // Initial state - empty list
+    // Return empty list initially - the screen will show loading
+    // until fetchSalesInvoices is called
     return [];
   }
 
@@ -20,6 +22,7 @@ class SalesInvoices extends _$SalesInvoices {
     BuildContext context,
     String companyId,
   ) async {
+    _hasAttemptedFetch = true;
     state = const AsyncValue.loading();
 
     try {
@@ -50,6 +53,8 @@ class SalesInvoices extends _$SalesInvoices {
       state = AsyncValue.error(e.toString(), stackTrace);
     }
   }
+
+  bool get hasAttemptedFetch => _hasAttemptedFetch;
 }
 
 @riverpod

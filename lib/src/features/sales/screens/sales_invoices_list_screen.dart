@@ -136,6 +136,21 @@ class _SalesInvoicesListScreenState
       ),
       body: invoicesState.when(
         data: (invoices) {
+          // Check if we've attempted to fetch - if not, show loading
+          final hasAttemptedFetch = ref
+              .read(salesInvoicesProvider.notifier)
+              .hasAttemptedFetch;
+          
+          if (!hasAttemptedFetch) {
+            // Initial state - show loading until fetch is triggered
+            return Center(
+              child: CircularProgressIndicator(
+                color: colors?.primary,
+              ),
+            );
+          }
+
+          // After fetch, show empty state if no invoices
           if (invoices.isEmpty) {
             return Center(
               child: Column(

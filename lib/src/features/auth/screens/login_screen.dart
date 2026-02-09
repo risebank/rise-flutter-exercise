@@ -11,13 +11,106 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  bool _obscurePassword = true;
+  bool _isFormValid = false;
+  String? _emailError;
+  String? _passwordError;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  late final Auth _authNotifier; // Store notifier reference to avoid using ref after dispose
+
   @override
   void initState() {
     super.initState();
+    // Get controllers from provider and store references
+    _authNotifier = ref.read(authProvider.notifier);
+    _emailController = _authNotifier.emailController;
+    _passwordController = _authNotifier.passwordController;
+
     // Clear any previous error state when entering the screen
+    // Use addPostFrameCallback to ensure it runs after the widget tree is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(authProvider.notifier).clearError();
+      if (mounted) {
+        // Use the stored notifier reference instead of ref.read()
+        _authNotifier.clearError();
+      }
     });
+
+    // Listen to text field changes for validation
+    _emailController.addListener(_validateForm);
+    _passwordController.addListener(_validateForm);
+  }
+
+  @override
+  void dispose() {
+    // Remove listeners before disposing
+    _emailController.removeListener(_validateForm);
+    _passwordController.removeListener(_validateForm);
+    super.dispose();
+  }
+
+  void _validateForm() {
+    // Guard against calling setState after widget is disposed
+    if (!mounted) return;
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    // Email validation
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    String? emailError;
+    if (email.isEmpty) {
+      emailError = null;
+    } else if (!emailRegex.hasMatch(email)) {
+      emailError = 'Please enter a valid email address';
+    } else {
+      emailError = null;
+    }
+
+    // Password validation - matches backend Cognito policy:
+    // - Minimum 8 characters
+    // - Must contain digits (numbers)
+    // - Must contain lowercase letters
+    // - Must contain symbols (special characters)
+    // - Uppercase letters are optional
+    String? passwordError;
+    if (password.isEmpty) {
+      passwordError = null;
+    } else {
+      final hasMinLength = password.length >= 8;
+      final hasDigits = RegExp(r'[0-9]').hasMatch(password);
+      final hasLowercase = RegExp(r'[a-z]').hasMatch(password);
+      // Match common special characters - use regular string to properly escape quotes
+      final hasSymbols = RegExp('[!@#\$%^&*()_+\\-=\\[\\]{};\':"\\\\|,.<>\\/?]').hasMatch(password);
+
+      if (!hasMinLength) {
+        passwordError = 'Password must be at least 8 characters';
+      } else if (!hasDigits) {
+        passwordError = 'Password must contain at least one number';
+      } else if (!hasLowercase) {
+        passwordError = 'Password must contain at least one lowercase letter';
+      } else if (!hasSymbols) {
+        passwordError = 'Password must contain at least one special character';
+      } else {
+        passwordError = null;
+      }
+    }
+
+    // Form is valid if email is valid and password meets all requirements
+    final isEmailValid = emailRegex.hasMatch(email);
+    final isPasswordValid = passwordError == null && password.isNotEmpty;
+    final isValid = isEmailValid && isPasswordValid;
+
+    // Only update state if widget is still mounted
+    if (mounted) {
+      setState(() {
+        _emailError = emailError;
+        _passwordError = passwordError;
+        _isFormValid = isValid;
+      });
+    }
   }
 
   @override
@@ -69,10 +162,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 48),
                   TextField(
-                    controller: authNotifier.emailController,
+                    controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     enabled: !authState.isLoading,
                     style: textTheme.bodyLarge,
+                    onChanged: (_) => _validateForm(),
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: textTheme.bodyMedium?.copyWith(
@@ -84,22 +178,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       filled: true,
                       fillColor: colors?.surfaceContainerLowest,
+                      errorText: _emailError,
+                      errorStyle: textTheme.bodySmall?.copyWith(
+                        color: colors?.error,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: colors?.outlineVariant ?? Colors.transparent,
+                          color: _emailError != null
+                              ? (colors?.error ?? Colors.red)
+                              : (colors?.outlineVariant ?? Colors.transparent),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: colors?.outlineVariant ?? Colors.transparent,
+                          color: _emailError != null
+                              ? (colors?.error ?? Colors.red)
+                              : (colors?.outlineVariant ?? Colors.transparent),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: colors?.primary ?? Colors.blue,
+                          color: _emailError != null
+                              ? (colors?.error ?? Colors.red)
+                              : (colors?.primary ?? Colors.blue),
+                          width: 2,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: colors?.error ?? Colors.red,
+                          width: 2,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: colors?.error ?? Colors.red,
                           width: 2,
                         ),
                       ),
@@ -107,10 +225,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: authNotifier.passwordController,
-                    obscureText: true,
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
                     enabled: !authState.isLoading,
                     style: textTheme.bodyLarge,
+                    onChanged: (_) => _validateForm(),
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: textTheme.bodyMedium?.copyWith(
@@ -120,24 +239,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Icons.lock_outlined,
                         color: colors?.onSurfaceVariant,
                       ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: colors?.onSurfaceVariant,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                       filled: true,
                       fillColor: colors?.surfaceContainerLowest,
+                      errorText: _passwordError,
+                      errorStyle: textTheme.bodySmall?.copyWith(
+                        color: colors?.error,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: colors?.outlineVariant ?? Colors.transparent,
+                          color: _passwordError != null
+                              ? (colors?.error ?? Colors.red)
+                              : (colors?.outlineVariant ?? Colors.transparent),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: colors?.outlineVariant ?? Colors.transparent,
+                          color: _passwordError != null
+                              ? (colors?.error ?? Colors.red)
+                              : (colors?.outlineVariant ?? Colors.transparent),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: colors?.primary ?? Colors.blue,
+                          color: _passwordError != null
+                              ? (colors?.error ?? Colors.red)
+                              : (colors?.primary ?? Colors.blue),
+                          width: 2,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: colors?.error ?? Colors.red,
+                          width: 2,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: colors?.error ?? Colors.red,
                           width: 2,
                         ),
                       ),
@@ -148,12 +304,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     data: (_) => SizedBox(
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: () async {
-                          await authNotifier.login(context);
-                        },
+                        onPressed: _isFormValid && !authState.isLoading
+                            ? () async {
+                                // Clear any previous errors before attempting login
+                                authNotifier.clearError();
+                                await authNotifier.login(context);
+                              }
+                            : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: colors?.primary,
-                          foregroundColor: colors?.onPrimary,
+                          backgroundColor: _isFormValid
+                              ? (colors?.primary)
+                              : (colors?.surfaceContainerHigh),
+                          foregroundColor: _isFormValid
+                              ? (colors?.onPrimary)
+                              : (colors?.onSurfaceVariant),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -162,7 +326,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           'Login',
                           style: textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: colors?.onPrimary,
+                            color: _isFormValid
+                                ? (colors?.onPrimary)
+                                : (colors?.onSurfaceVariant),
                           ),
                         ),
                       ),
@@ -225,13 +391,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         SizedBox(
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: () async {
-                              authNotifier.clearError();
-                              await authNotifier.login(context);
-                            },
+                            onPressed: _isFormValid
+                                ? () async {
+                                    authNotifier.clearError();
+                                    await authNotifier.login(context);
+                                  }
+                                : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: colors?.primary,
-                              foregroundColor: colors?.onPrimary,
+                              backgroundColor: _isFormValid
+                                  ? (colors?.primary)
+                                  : (colors?.surfaceContainerHigh),
+                              foregroundColor: _isFormValid
+                                  ? (colors?.onPrimary)
+                                  : (colors?.onSurfaceVariant),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -240,7 +412,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               'Try Again',
                               style: textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: colors?.onPrimary,
+                                color: _isFormValid
+                                    ? (colors?.onPrimary)
+                                    : (colors?.onSurfaceVariant),
                               ),
                             ),
                           ),

@@ -159,12 +159,19 @@ class ApiClient {
         final responseData = e.response!.data;
 
         if (responseData is Map<String, dynamic>) {
+          safePrint(
+            '❌ [ApiClient.post] Error response data: ${jsonEncode(responseData)}',
+          );
           errorMessage =
               responseData['error'] as String? ??
               responseData['message'] as String? ??
               responseData['debug'] as String? ??
               e.message ??
               'Request failed';
+          if (responseData['errors'] != null) {
+            errorMessage =
+                '$errorMessage: ${jsonEncode(responseData['errors'])}';
+          }
         } else if (responseData is String) {
           errorMessage = responseData;
         } else {

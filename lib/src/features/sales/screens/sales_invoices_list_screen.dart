@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/sales/widgets/invoice_list_item.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
@@ -98,6 +99,13 @@ class _SalesInvoicesListScreenState
             },
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/sales-invoices-create'),
+        tooltip: 'Add invoice',
+        backgroundColor: colors?.primary,
+        foregroundColor: colors?.onPrimary,
+        child: const Icon(Icons.add),
       ),
       body: invoicesState.when(
         data: (invoices) {

@@ -53,6 +53,14 @@ class SalesService {
       context: context,
     );
 
+    debugPrint(
+      '🔎 [SalesService.fetchSalesInvoiceById] '
+      'success=${response.success} '
+      'status=${response.statusCode} '
+      'message=${response.message} '
+      'data=${response.data}',
+    );
+
     return ApiResponse.fromApiClientResponse(
       context,
       response,
@@ -71,11 +79,183 @@ class SalesService {
     String companyId,
     SalesInvoiceModel invoice,
   ) async {
-    // TODO: Task 1 - Implement POST request to create sales invoice
-    throw UnimplementedError(
-      'createSalesInvoice is not yet implemented. '
-      'This is Task 1 of the exercise - please implement the POST endpoint.',
+    final endpoint = Endpoints.salesInvoices.replaceAll(
+      '{company_id}',
+      companyId,
     );
+
+    final payload = Map<String, dynamic>.from(invoice.toJson());
+    payload.remove('id');
+    payload.remove('created_at');
+    payload.remove('updated_at');
+    payload.remove('status');
+    payload.remove('gross_amount');
+    payload.remove('vat_amount');
+    payload.remove('journal_number');
+
+    final recipient = payload['recipient'];
+    if (recipient is RecipientModel) {
+      payload['recipient'] = recipient.toJson();
+    }
+    if (payload['recipient'] is Map<String, dynamic>) {
+      final recipientMap =
+          Map<String, dynamic>.from(payload['recipient'] as Map);
+      if (recipientMap['id'] != null) {
+        payload['recipientid'] = recipientMap['id'];
+        payload.remove('recipient');
+      }
+      if (payload.containsKey('recipient_invoicing_email')) {
+        recipientMap['invoicing_email'] = payload['recipient_invoicing_email'];
+        payload.remove('recipient_invoicing_email');
+      }
+      if (payload.containsKey('recipient_invoicing_address')) {
+        recipientMap['invoicing_address'] =
+            payload['recipient_invoicing_address'];
+        payload.remove('recipient_invoicing_address');
+      }
+      if (recipientMap['invoicing_address'] is AddressModel) {
+        recipientMap['invoicing_address'] =
+            (recipientMap['invoicing_address'] as AddressModel).toJson();
+      }
+      if (payload.containsKey('recipient')) {
+        payload['recipient'] = recipientMap;
+      }
+    }
+    final invoicingAddress = payload['recipient_invoicing_address'];
+    if (invoicingAddress is AddressModel) {
+      payload['recipient_invoicing_address'] = invoicingAddress.toJson();
+    }
+    final senderAddress = payload['sender_address'];
+    if (senderAddress is AddressModel) {
+      payload['sender_address'] = senderAddress.toJson();
+    }
+
+    if (payload['lines'] is List) {
+      payload['lines'] = (payload['lines'] as List)
+          .map((line) {
+            if (line is InvoiceLineModel) {
+              return line.toJson();
+            }
+            if (line is Map<String, dynamic>) {
+              return Map<String, dynamic>.from(line);
+            }
+            return null;
+          })
+          .where((line) => line != null)
+          .map((line) {
+            final map = Map<String, dynamic>.from(line as Map);
+            map.remove('id');
+            return map;
+          })
+          .toList();
+    }
+
+    final cleanedPayload = _removeNulls(payload);
+    _normalizeNumericStrings(cleanedPayload);
+    debugPrint(
+      '🧾 [SalesService.createSalesInvoice] payload=$cleanedPayload',
+    );
+
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      endpoint,
+      data: cleanedPayload,
+      context: context,
+    );
+
+    debugPrint(
+      '✅ [SalesService.createSalesInvoice] '
+      'success=${response.success} '
+      'status=${response.statusCode} '
+      'message=${response.message} '
+      'data=${response.data}',
+    );
+
+    return ApiResponse.fromApiClientResponse(
+      context,
+      response,
+      parser: (json) =>
+          SalesInvoiceModel.fromJson(json as Map<String, dynamic>),
+      errorMessage: ErrorMessages.createError(context, 'sales invoice'),
+    );
+  }
+
+  static Map<String, dynamic> _removeNulls(Map<String, dynamic> input) {
+    final cleaned = <String, dynamic>{};
+
+    input.forEach((key, value) {
+      if (value == null) {
+        return;
+      }
+      if (value is Map<String, dynamic>) {
+        final nested = _removeNulls(value);
+        if (nested.isNotEmpty) {
+          cleaned[key] = nested;
+        }
+        return;
+      }
+      if (value is List) {
+        final cleanedList = value
+            .map((item) {
+              if (item is Map<String, dynamic>) {
+                return _removeNulls(item);
+              }
+              return item;
+            })
+            .where((item) {
+              if (item is Map<String, dynamic>) {
+                return item.isNotEmpty;
+              }
+              return item != null;
+            })
+            .toList();
+        if (cleanedList.isNotEmpty) {
+          cleaned[key] = cleanedList;
+        }
+        return;
+      }
+
+      cleaned[key] = value;
+    });
+
+    return cleaned;
+  }
+
+  static void _normalizeNumericStrings(Map<String, dynamic> input) {
+    final numericKeys = {
+      'recipientid',
+      'quantity',
+      'unit_price',
+      'vat_rate',
+      'amount',
+    };
+
+    void normalizeValue(String key, Map<String, dynamic> map) {
+      final value = map[key];
+      if (value is String) {
+        final trimmed = value.trim();
+        if (trimmed.isEmpty) {
+          return;
+        }
+        final parsed = num.tryParse(trimmed);
+        if (parsed != null) {
+          map[key] = parsed;
+        }
+      }
+    }
+
+    input.forEach((key, value) {
+      if (numericKeys.contains(key)) {
+        normalizeValue(key, input);
+      } else if (value is Map<String, dynamic>) {
+        _normalizeNumericStrings(value);
+      } else if (value is List) {
+        for (final item in value) {
+          if (item is Map<String, dynamic>) {
+            _normalizeNumericStrings(item);
+          }
+        }
+      }
+    });
   }
 
   /// Update an existing sales invoice

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
@@ -17,8 +19,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _passwordError;
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
+  late final FocusNode _passwordFocusNode;
   late final Auth
   _authNotifier; // Store notifier reference to avoid using ref after dispose
+  Timer? _validationTimer;
 
   @override
   void initState() {
@@ -27,21 +31,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _authNotifier = ref.read(authProvider.notifier);
     _emailController = _authNotifier.emailController;
     _passwordController = _authNotifier.passwordController;
+    _passwordFocusNode = FocusNode();
 
     // Don't clear errors automatically - let them persist so users can see what went wrong
     // Errors will only be cleared when user explicitly tries to login again
 
-    // Listen to text field changes for validation
-    _emailController.addListener(_validateForm);
-    _passwordController.addListener(_validateForm);
+    // Listen to text field changes for validation with debouncing
+    _emailController.addListener(_debouncedValidateForm);
+    _passwordController.addListener(_debouncedValidateForm);
   }
 
   @override
   void dispose() {
+    // Cancel any pending validation timers
+    _validationTimer?.cancel();
     // Remove listeners before disposing
-    _emailController.removeListener(_validateForm);
-    _passwordController.removeListener(_validateForm);
+    _emailController.removeListener(_debouncedValidateForm);
+    _passwordController.removeListener(_debouncedValidateForm);
+    _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  void _debouncedValidateForm() {
+    // Cancel any existing timer
+    _validationTimer?.cancel();
+    // Schedule validation after a short delay to avoid DOM conflicts during typing
+    _validationTimer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        _validateForm();
+      }
+    });
   }
 
   String _formatErrorMessage(String error) {
@@ -118,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isPasswordValid = passwordError == null && password.isNotEmpty;
     final isValid = isEmailValid && isPasswordValid;
 
-    // Only update state if widget is still mounted
+    // Update state - validation is already debounced, so this is safe
     if (mounted) {
       setState(() {
         _emailError = emailError;
@@ -182,7 +201,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       enabled: !authState.isLoading,
                       style: textTheme.bodyLarge,
-                      onChanged: (_) => _validateForm(),
                       autofillHints: const [AutofillHints.email],
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
@@ -247,10 +265,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextField(
                       key: const ValueKey('password_field'),
                       controller: _passwordController,
+                      focusNode: _passwordFocusNode,
                       obscureText: _obscurePassword,
                       enabled: !authState.isLoading,
                       style: textTheme.bodyLarge,
-                      onChanged: (_) => _validateForm(),
                       autofillHints: const [AutofillHints.password],
                       textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
@@ -270,8 +288,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             color: colors?.onSurfaceVariant,
                           ),
                           onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
+                            // Unfocus before toggling to avoid DOM element lifecycle issues on web
+                            _passwordFocusNode.unfocus();
+                            // Delay state update to allow focus to clear first
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                                // Refocus after state update
+                                _passwordFocusNode.requestFocus();
+                              }
                             });
                           },
                         ),

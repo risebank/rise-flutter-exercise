@@ -1,14 +1,15 @@
 // Conditional imports for platform-specific environment variable access
-import 'environment_stub.dart' as platform_env
+import 'environment_stub.dart'
     if (dart.library.io) 'environment_io.dart'
-    if (dart.library.html) 'environment_web.dart';
+    if (dart.library.html) 'environment_web.dart'
+    as platform_env;
 
 enum EnvironmentType { dev, staging, prod }
 
 class Environment {
   // Read from environment variables (GitHub Secrets in CI, system env locally)
   // Falls back to hardcoded values if not set (for test-takers without access)
-  // 
+  //
   // Note: On web, environment variables are not available at runtime.
   // The app will use fallback values. For CI/CD, use --dart-define flags
   // or configure via build-time constants.
@@ -21,9 +22,9 @@ class Environment {
   }
 
   static String get apiBaseUrl => _getEnv(
-        'API_BASE_URL',
-        'https://6fsryeht36.execute-api.eu-central-1.amazonaws.com',
-      );
+    'API_BASE_URL',
+    'https://6fsryeht36.execute-api.eu-central-1.amazonaws.com',
+  );
 
   static String get cognitoUserPoolId =>
       _getEnv('COGNITO_USER_POOL_ID', 'eu-central-1_Z1eAi51xP');

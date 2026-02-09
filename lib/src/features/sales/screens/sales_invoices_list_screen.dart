@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/sales/widgets/invoice_list_item.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
@@ -127,9 +126,7 @@ class _SalesInvoicesListScreenState
             tooltip: 'Logout',
             onPressed: () async {
               await ref.read(authProvider.notifier).logout(context);
-              if (context.mounted) {
-                context.go('/login');
-              }
+              // Router redirect will automatically handle navigation to /login
             },
           ),
         ],

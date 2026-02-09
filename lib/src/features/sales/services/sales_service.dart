@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rise_flutter_exercise/src/globals/services/api_response.dart';
 import 'package:rise_flutter_exercise/src/globals/services/api_client.dart';
 import 'package:rise_flutter_exercise/src/globals/services/endpoints.dart';
@@ -85,7 +86,7 @@ class SalesService {
 
     // Log payload for debugging while developing (remove in production)
     try {
-      safePrint('🔁 [SalesService] POST payload: $payload');
+      debugPrint('🔁 [SalesService] POST payload: $payload');
     } catch (_) {}
 
     final response = await _apiClient.post<Map<String, dynamic>>(
@@ -170,7 +171,7 @@ class SalesService {
 
     // Log payload for debugging while developing (remove in production)
     try {
-      safePrint('🔁 [SalesService] PATCH payload: $payload');
+      debugPrint('🔁 [SalesService] PATCH payload: $payload');
     } catch (_) {}
 
     final response = await _apiClient.patch<Map<String, dynamic>>(

@@ -76,6 +76,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return null; // Don't redirect while loading - keeps login screen visible
         }
 
+        // If we're on login page and there's an error, stay on login page
+        // This prevents flicker when login fails - user should see the error message
+        if (isGoingToLogin && authStateValue.hasError) {
+          debugPrint(
+            '⏳ [Router] Login error detected, staying on login page to show error',
+          );
+          return null; // Stay on login page to show error
+        }
+
         // Check if user is signed in via Amplify session (not just provider state)
         // This ensures auth persists on page reload and handles logout transitions
         // Only check session if not loading to avoid premature redirects during login
@@ -131,6 +140,14 @@ class MyApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark, // Default to dark mode to match rise-mobile-app
       routerConfig: router,
+      // Prevent white flash during route transitions
+      builder: (context, child) {
+        final theme = Theme.of(context);
+        return Container(
+          color: theme.scaffoldBackgroundColor,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

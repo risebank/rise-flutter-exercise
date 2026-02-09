@@ -88,11 +88,8 @@ class Auth extends _$Auth {
           }
 
           // Update auth state - this will trigger router rebuild and redirect
+          // No delay needed - router will handle redirect on next rebuild cycle
           state = AsyncValue.data(user);
-
-          // Small delay to ensure state is propagated before navigation
-          // The router will handle navigation via redirect logic
-          await Future.delayed(const Duration(milliseconds: 100));
         } else {
           state = AsyncValue.error(
             'Failed to retrieve user information after login',

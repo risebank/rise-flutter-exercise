@@ -81,6 +81,34 @@ class SelectedSalesInvoice extends _$SelectedSalesInvoice {
       state = AsyncValue.error(e.toString(), stackTrace);
     }
   }
+
+  Future<SalesInvoiceModel?> fetchSalesInvoiceAsyncValue(
+    BuildContext context,
+    String companyId,
+    String invoiceId,
+  ) async {
+    try {
+      final response = await _service.fetchSalesInvoiceById(
+        context,
+        companyId,
+        invoiceId,
+      );
+
+      if (response.success && response.data != null) {
+        state = AsyncValue.data(response.data);
+        return response.data;
+      } else {
+        state = AsyncValue.error(
+          response.message ?? 'Failed to fetch sales invoice',
+          StackTrace.current,
+        );
+        return null;
+      }
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e.toString(), stackTrace);
+      return null;
+    }
+  }
 }
 
 // Provider for creating sales invoices

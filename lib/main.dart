@@ -5,6 +5,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:rise_flutter_exercise/src/features/auth/screens/login_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoices_list_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoice_create_screen.dart';
+import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoice_edit_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoice_detail_screen.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
@@ -34,6 +35,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sales-invoices/create',
         builder: (context, state) => const SalesInvoiceCreateScreen(),
+      ),
+      GoRoute(
+        path: '/sales-invoices/:invoiceId/edit',
+        builder: (context, state) {
+          final invoiceId = state.pathParameters['invoiceId']!;
+          return SalesInvoiceEditScreen(invoiceId: invoiceId);
+        },
       ),
       GoRoute(
         path: '/sales-invoices/:invoiceId',

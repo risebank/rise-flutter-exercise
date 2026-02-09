@@ -4,8 +4,10 @@ import 'package:rise_flutter_exercise/src/globals/services/endpoints.dart';
 void main() {
   group('Endpoints', () {
     test('should have correct base URL', () {
-      expect(Endpoints.baseUrl,
-          'https://6fsryeht36.execute-api.eu-central-1.amazonaws.com');
+      expect(
+        Endpoints.baseUrl,
+        'https://6fsryeht36.execute-api.eu-central-1.amazonaws.com',
+      );
     });
 
     test('should have correct whoami endpoint', () {

@@ -185,14 +185,24 @@ lib/
 
 ## Environment Configuration
 
-This exercise uses the **development environment** setup with hardcoded configuration:
-- **Environment:** Development
-- **API Base URL:** `https://6fsryeht36.execute-api.eu-central-1.amazonaws.com`
-- **Cognito User Pool ID:** `eu-central-1_Z1eAi51xP`
-- **Cognito Client ID:** `2fc1pebmi9acbnt8r42c6srbpe`
-- **Region:** `eu-central-1`
+This exercise uses environment variables with fallback values. The application will work out of the box using fallback values, but you can optionally configure your own:
 
-The configuration is hardcoded in `lib/src/globals/config/environment.dart` for simplicity.
+**Option 1: Use Default Values (Recommended)**
+- The application includes fallback values that work for the test environment
+- No configuration needed - just run the app
+
+**Option 2: Set Environment Variables Locally**
+- Copy `.env.example` to `.env.local` (not committed to git)
+- Or set environment variables in your IDE/terminal:
+  ```bash
+  export API_BASE_URL="your-api-url"
+  export COGNITO_USER_POOL_ID="your-pool-id"
+  export COGNITO_CLIENT_ID="your-client-id"
+  export AWS_REGION="eu-central-1"
+  export ENVIRONMENT="dev"
+  ```
+
+The application reads from environment variables first, then falls back to default values if not set. See `.env.example` for the expected format.
 
 ## API Endpoints Reference
 

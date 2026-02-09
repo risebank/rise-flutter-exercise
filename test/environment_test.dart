@@ -8,8 +8,10 @@ void main() {
     });
 
     test('should have correct API base URL', () {
-      expect(Environment.apiBaseUrl,
-          'https://6fsryeht36.execute-api.eu-central-1.amazonaws.com');
+      expect(
+        Environment.apiBaseUrl,
+        'https://6fsryeht36.execute-api.eu-central-1.amazonaws.com',
+      );
     });
 
     test('should have correct Cognito configuration', () {

@@ -19,6 +19,12 @@ jobs:
     name: Code Quality Checks
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'dev' }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+      COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION || 'eu-central-1' }}
 
     steps:
       - name: Checkout code
@@ -62,6 +68,12 @@ jobs:
     name: Format Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'dev' }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+      COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION || 'eu-central-1' }}
 
     steps:
       - name: Checkout code
@@ -99,6 +111,12 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'dev' }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+      COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION || 'eu-central-1' }}
 
     steps:
       - name: Checkout code

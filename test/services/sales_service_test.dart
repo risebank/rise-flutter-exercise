@@ -12,9 +12,7 @@ void main() {
       service = SalesService();
       // Create a test context for service calls
       testContext = MaterialApp(
-        home: Scaffold(
-          body: Container(),
-        ),
+        home: Scaffold(body: Container()),
       ).createElement();
     });
 
@@ -27,11 +25,7 @@ void main() {
         );
 
         expect(
-          () => service.createSalesInvoice(
-            testContext,
-            'company-id',
-            invoice,
-          ),
+          () => service.createSalesInvoice(testContext, 'company-id', invoice),
           throwsA(isA<UnimplementedError>()),
         );
       });

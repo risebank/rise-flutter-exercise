@@ -60,9 +60,7 @@ void main() {
     });
 
     test('should handle null values', () {
-      final model = SalesInvoiceModel(
-        lines: [],
-      );
+      final model = SalesInvoiceModel(lines: []);
 
       expect(model.id, isNull);
       expect(model.description, isNull);

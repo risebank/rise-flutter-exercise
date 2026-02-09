@@ -8,6 +8,7 @@ import 'package:rise_flutter_exercise/src/globals/widgets/rise_info_row.dart';
 import 'package:rise_flutter_exercise/src/globals/widgets/rise_section_header.dart';
 import 'package:rise_flutter_exercise/src/globals/widgets/rise_status_badge.dart';
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
+import 'package:rise_flutter_exercise/src/globals/widgets/rise_gradient_fab.dart';
 
 class SalesInvoiceDetailScreen extends ConsumerStatefulWidget {
   final String invoiceId;
@@ -99,12 +100,10 @@ class _SalesInvoiceDetailScreenState
         // TODO: Task 2 - Add navigation to edit screen if needed
         // The design and implementation of the edit functionality is up to you
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: RiseGradientFab(
         onPressed: () =>
             context.push('/sales-invoices/${widget.invoiceId}/edit'),
         tooltip: 'Edit invoice',
-        backgroundColor: colors?.primary,
-        foregroundColor: colors?.onPrimary,
         child: const Icon(Icons.edit),
       ),
       body: invoiceState.when(

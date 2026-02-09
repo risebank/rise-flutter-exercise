@@ -534,6 +534,32 @@ class _SalesInvoiceFormState extends State<SalesInvoiceForm> {
                     ? null
                     : () async {
                         if (!_formKey.currentState!.validate()) {
+                          final theme = Theme.of(context);
+                          final riseTheme =
+                              theme.extension<RiseAppThemeExtension>();
+                          final colors = riseTheme?.config.colors;
+                          final textTheme = theme.textTheme;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: colors?.error,
+                              behavior: SnackBarBehavior.floating,
+                              content: Row(
+                                children: [
+                                  Icon(Icons.error, color: colors?.onError),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Please fix the highlighted fields.',
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: colors?.onError,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
                           return;
                         }
                         await widget.onSubmit(_buildInvoice());

@@ -6,6 +6,7 @@ import 'package:rise_flutter_exercise/src/features/sales/widgets/invoice_list_it
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
 import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
+import 'package:rise_flutter_exercise/src/globals/widgets/rise_gradient_fab.dart';
 
 class SalesInvoicesListScreen extends ConsumerStatefulWidget {
   const SalesInvoicesListScreen({super.key});
@@ -100,11 +101,9 @@ class _SalesInvoicesListScreenState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: RiseGradientFab(
         onPressed: () => context.push('/sales-invoices-create'),
         tooltip: 'Add invoice',
-        backgroundColor: colors?.primary,
-        foregroundColor: colors?.onPrimary,
         child: const Icon(Icons.add),
       ),
       body: invoicesState.when(

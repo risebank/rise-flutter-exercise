@@ -128,12 +128,18 @@ class AppTheme {
     useMaterial3: true,
     colorScheme: RiseAppThemeConfig.light().colorScheme,
     textTheme: RiseAppThemeConfig.light().textTheme,
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      shape: CircleBorder(),
+    ),
     extensions: [RiseAppThemeExtension(RiseAppThemeConfig.light())],
   );
   static final dark = ThemeData(
     useMaterial3: true,
     colorScheme: RiseAppThemeConfig.dark().colorScheme,
     textTheme: RiseAppThemeConfig.dark().textTheme,
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      shape: CircleBorder(),
+    ),
     extensions: [RiseAppThemeExtension(RiseAppThemeConfig.dark())],
   );
 }

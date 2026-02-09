@@ -93,6 +93,7 @@ class SalesService {
     payload.remove('vat_amount');
     payload.remove('journal_number');
 
+    // Keep recipient as nested object with just id (remove name/email if null)
     final recipient = payload['recipient'];
     if (recipient is RecipientModel) {
       payload['recipient'] = recipient.toJson();
@@ -100,34 +101,13 @@ class SalesService {
     if (payload['recipient'] is Map<String, dynamic>) {
       final recipientMap =
           Map<String, dynamic>.from(payload['recipient'] as Map);
-      if (recipientMap['id'] != null) {
-        payload['recipientid'] = recipientMap['id'];
+      // Remove null fields from recipient, keep only id
+      recipientMap.removeWhere((key, value) => value == null);
+      if (recipientMap.isNotEmpty) {
+        payload['recipient'] = recipientMap;
+      } else {
         payload.remove('recipient');
       }
-      if (payload.containsKey('recipient_invoicing_email')) {
-        recipientMap['invoicing_email'] = payload['recipient_invoicing_email'];
-        payload.remove('recipient_invoicing_email');
-      }
-      if (payload.containsKey('recipient_invoicing_address')) {
-        recipientMap['invoicing_address'] =
-            payload['recipient_invoicing_address'];
-        payload.remove('recipient_invoicing_address');
-      }
-      if (recipientMap['invoicing_address'] is AddressModel) {
-        recipientMap['invoicing_address'] =
-            (recipientMap['invoicing_address'] as AddressModel).toJson();
-      }
-      if (payload.containsKey('recipient')) {
-        payload['recipient'] = recipientMap;
-      }
-    }
-    final invoicingAddress = payload['recipient_invoicing_address'];
-    if (invoicingAddress is AddressModel) {
-      payload['recipient_invoicing_address'] = invoicingAddress.toJson();
-    }
-    final senderAddress = payload['sender_address'];
-    if (senderAddress is AddressModel) {
-      payload['sender_address'] = senderAddress.toJson();
     }
 
     if (payload['lines'] is List) {
@@ -222,7 +202,6 @@ class SalesService {
 
   static void _normalizeNumericStrings(Map<String, dynamic> input) {
     final numericKeys = {
-      'recipientid',
       'quantity',
       'unit_price',
       'vat_rate',

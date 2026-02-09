@@ -131,11 +131,11 @@ class _SalesInvoiceCreateScreenState
   }
 
   SalesInvoiceModel _buildInvoice() {
-    final recipient = RecipientModel(
-      id: _recipientIdController.text.trim().isEmpty
-          ? null
-          : _recipientIdController.text.trim(),
-    );
+    const fallbackRecipientId = '718d6a3e-c5ac-49c7-8fae-f57021ca67dd';
+    final recipientId = _recipientIdController.text.trim().isEmpty
+        ? fallbackRecipientId
+        : _recipientIdController.text.trim();
+    final recipient = RecipientModel(id: recipientId);
 
     final address = AddressModel(
       street: _streetController.text.trim().isEmpty
@@ -351,11 +351,10 @@ class _SalesInvoiceCreateScreenState
                             controller: _recipientIdController,
                             decoration: _inputDecoration(
                               label: 'Recipient ID',
+                              hint: 'Default: 718d6a3e-c5ac-49c7-8fae-f57021ca67dd',
                               fillColor: colors?.surfaceContainer,
                               borderColor: colors?.outlineVariant,
                             ),
-                            validator: (value) =>
-                                _requiredField(value, 'Recipient ID'),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(

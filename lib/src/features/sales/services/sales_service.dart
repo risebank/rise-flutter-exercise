@@ -108,6 +108,26 @@ class SalesService {
     Map<String, dynamic> input, {
     required Set<String> excludeKeys,
   }) {
+    // Helper that attempts to convert model instances to serializable forms
+    dynamic _toSerializable(dynamic v) {
+      if (v == null) return null;
+      if (v is Map<String, dynamic>) return v;
+      if (v is List) return v;
+
+      // Primitive types
+      if (v is String || v is num || v is bool) return v;
+
+      // Try to call toJson on model instances
+      try {
+        final dyn = v as dynamic;
+        final converted = dyn.toJson();
+        return converted;
+      } catch (_) {
+        // Not a model with toJson, return as-is
+        return v;
+      }
+    }
+
     Map<String, dynamic> cleanMap(Map<String, dynamic> m) {
       final result = <String, dynamic>{};
 
@@ -116,23 +136,32 @@ class SalesService {
 
         if (value == null) return;
 
-        if (value is Map<String, dynamic>) {
-          final nested = cleanMap(value);
+        final serial = _toSerializable(value);
+
+        if (serial == null) return;
+
+        if (serial is Map<String, dynamic>) {
+          final nested = cleanMap(serial);
           if (nested.isNotEmpty) result[key] = nested;
-        } else if (value is List) {
+        } else if (serial is List) {
           final cleanedList = <dynamic>[];
-          for (var item in value) {
+          for (var item in serial) {
             if (item == null) continue;
-            if (item is Map<String, dynamic>) {
-              final nested = cleanMap(item);
+            final s = _toSerializable(item);
+            if (s is Map<String, dynamic>) {
+              final nested = cleanMap(s);
               if (nested.isNotEmpty) cleanedList.add(nested);
-            } else {
-              cleanedList.add(item);
+            } else if (s is List) {
+              // Nested lists: add if not empty after filtering
+              final inner = s.where((e) => e != null).toList();
+              if (inner.isNotEmpty) cleanedList.add(inner);
+            } else if (s != null) {
+              cleanedList.add(s);
             }
           }
           if (cleanedList.isNotEmpty) result[key] = cleanedList;
         } else {
-          result[key] = value;
+          result[key] = serial;
         }
       });
 

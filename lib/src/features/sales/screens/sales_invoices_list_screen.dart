@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
 import 'package:rise_flutter_exercise/src/features/sales/widgets/invoice_list_item.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
@@ -27,6 +28,15 @@ class _SalesInvoicesListScreenState
   }
 
   Future<void> _loadCompanyIdAndFetch() async {
+    final cachedInvoices = ref.read(salesInvoicesProvider).valueOrNull;
+    final hasAttemptedFetch =
+        ref.read(salesInvoicesProvider.notifier).hasAttemptedFetch;
+    if (hasAttemptedFetch &&
+        cachedInvoices != null &&
+        cachedInvoices.isNotEmpty) {
+      return;
+    }
+
     // Get company ID from WhoAmI service
     final authService = AuthService();
 
@@ -89,15 +99,29 @@ class _SalesInvoicesListScreenState
         backgroundColor: colors?.surfaceContainerLowest,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: Icon(Icons.logout, color: colors?.onSurface),
-            tooltip: 'Logout',
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout(context);
-              // Router redirect will automatically handle navigation to /login
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: colors?.onSurface),
+            onSelected: (value) async {
+              if (value == 'logout') {
+                await ref.read(authProvider.notifier).logout(context);
+                // Router redirect will automatically handle navigation to /login
+              }
             },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'logout',
+                child: Text('Logout'),
+              ),
+            ],
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.go('/sales-invoices-create'),
+        tooltip: 'Add invoice',
+        backgroundColor: colors?.primary,
+        foregroundColor: colors?.onPrimary,
+        child: const Icon(Icons.add),
       ),
       body: invoicesState.when(
         data: (invoices) {

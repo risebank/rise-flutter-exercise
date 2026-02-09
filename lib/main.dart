@@ -5,6 +5,8 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:rise_flutter_exercise/src/features/auth/screens/login_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoices_list_screen.dart';
 import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoice_detail_screen.dart';
+import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoice_create_screen.dart';
+import 'package:rise_flutter_exercise/src/features/sales/screens/sales_invoice_edit_screen.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
 import 'package:rise_flutter_exercise/src/globals/theme/rise_theme.dart';
 import 'amplifyconfiguration.dart';
@@ -31,13 +33,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SalesInvoicesListScreen(),
       ),
       GoRoute(
-        path: '/sales-invoices/:invoiceId',
+        path: '/sales-invoices-create',
+        builder: (context, state) => const SalesInvoiceCreateScreen(),
+      ),
+      GoRoute(
+        path: '/sales-invoices/:invoiceId([0-9a-fA-F-]+)/edit',
+        builder: (context, state) {
+          final invoiceId = state.pathParameters['invoiceId']!;
+          return SalesInvoiceEditScreen(invoiceId: invoiceId);
+        },
+      ),
+      GoRoute(
+        path: '/sales-invoices/:invoiceId([0-9a-fA-F-]+)',
         builder: (context, state) {
           final invoiceId = state.pathParameters['invoiceId']!;
           return SalesInvoiceDetailScreen(invoiceId: invoiceId);
         },
       ),
-      // TODO: Task 1 - Add route for create invoice screen (e.g., '/sales-invoices/create')
       // TODO: Task 2 - Add route for edit invoice screen (e.g., '/sales-invoices/:invoiceId/edit')
     ],
     redirect: (context, state) async {

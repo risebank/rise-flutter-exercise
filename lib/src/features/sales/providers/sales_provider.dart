@@ -12,6 +12,7 @@ class SalesInvoices extends _$SalesInvoices {
 
   @override
   Future<List<SalesInvoiceListItemModel>> build() async {
+    ref.keepAlive();
     _service = SalesService();
     // Return empty list initially - the screen will show loading
     // until fetchSalesInvoices is called
@@ -43,6 +44,46 @@ class SalesInvoices extends _$SalesInvoices {
   }
 
   bool get hasAttemptedFetch => _hasAttemptedFetch;
+
+  void addCreatedInvoice(SalesInvoiceModel invoice) {
+    _hasAttemptedFetch = true;
+    final current = state.valueOrNull ?? [];
+    final listItem = SalesInvoiceListItemModel(
+      id: invoice.id ?? '',
+      invoiceDate: invoice.invoiceDate,
+      dueDate: invoice.dueDate,
+      description: invoice.description,
+      status: invoice.status,
+      grossAmount: invoice.grossAmount,
+      recipient: invoice.recipient,
+    );
+
+    state = AsyncValue.data([listItem, ...current]);
+  }
+
+  void updateInvoiceListItem(SalesInvoiceModel invoice) {
+    final current = state.valueOrNull ?? [];
+    final invoiceId = invoice.id;
+    if (invoiceId == null || invoiceId.isEmpty) {
+      return;
+    }
+
+    final listItem = SalesInvoiceListItemModel(
+      id: invoiceId,
+      invoiceDate: invoice.invoiceDate,
+      dueDate: invoice.dueDate,
+      description: invoice.description,
+      status: invoice.status,
+      grossAmount: invoice.grossAmount,
+      recipient: invoice.recipient,
+    );
+
+    final updated = current
+        .map((item) => item.id == invoiceId ? listItem : item)
+        .toList();
+
+    state = AsyncValue.data(updated);
+  }
 }
 
 @riverpod

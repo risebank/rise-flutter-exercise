@@ -90,8 +90,14 @@ class _SalesInvoiceDetailScreenState
         ),
         backgroundColor: colors?.surfaceContainerLowest,
         elevation: 0,
-        // TODO: Task 2 - Add navigation to edit screen if needed
-        // The design and implementation of the edit functionality is up to you
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit, color: colors?.onSurface),
+            tooltip: 'Edit invoice',
+            onPressed: () =>
+                context.go('/sales-invoices/${widget.invoiceId}/edit'),
+          ),
+        ],
       ),
       body: invoiceState.when(
         data: (invoice) {

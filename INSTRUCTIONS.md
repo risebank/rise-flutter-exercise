@@ -137,7 +137,7 @@ lib/
 4. Parse the response and return `ApiResponse<SalesInvoiceModel>`
 5. Handle errors appropriately
 6. Design and implement a UI screen for creating invoices
-7. Add a route in `main.dart` for the create screen (e.g., `/sales-invoices/create`)
+7. Add a route in `main.dart` for the create screen (e.g., `/sales-invoices-create`)
 8. Add navigation to the create screen (e.g., a FloatingActionButton on the list screen or a button in the AppBar)
 9. Connect the UI to the service method via the provider (`SalesInvoiceCreator`)
 10. Show success/error messages to the user

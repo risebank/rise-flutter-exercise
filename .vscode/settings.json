@@ -4,5 +4,6 @@
   "git.detectSubmodules": true,
   "git.scanRepositories": [
     "/Users/paulovgha/rise-flutter-exercise"
-  ]
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/3.38.9"
 }

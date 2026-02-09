@@ -16,7 +16,7 @@ The application already has fully functional viewing capabilities (list and deta
 
 ## Test Account Credentials
 
-**Email:** `test@risebank.com`  
+**Email:** `test@risegroup.eu`  
 **Password:** `TestPassword123!`  
 **Company ID:** The company ID will be automatically retrieved from the `/me` (whoAmI) endpoint after successful login. The app fetches it from the user's permissions.
 

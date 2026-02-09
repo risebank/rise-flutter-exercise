@@ -18,13 +18,33 @@ class Auth extends _$Auth {
     // Just return getCurrentUser() - it will return null if not signed in
     // This matches rise-mobile-app's pattern and ensures auth state persists on page reload
     safePrint('🔍 [AuthProvider] Initializing auth state...');
+
+    // First check if user is signed in via Amplify session
+    final isSignedIn = await _service.isUserSignedIn();
+    safePrint('🔍 [AuthProvider] Amplify session check: $isSignedIn');
+
+    if (!isSignedIn) {
+      safePrint('ℹ️ [AuthProvider] No active session found');
+      return null;
+    }
+
+    // If signed in, get the user
     final user = await _service.getCurrentUser();
     if (user != null) {
-      safePrint('✅ [AuthProvider] User found on initialization: ${user.userId}');
-      // Fetch WhoAmI to ensure company ID is available
-      // Note: We can't use context here, so we'll fetch it when needed
+      safePrint(
+        '✅ [AuthProvider] User found on initialization: ${user.userId}',
+      );
+      // Ensure WhoAmI is cached if available
+      final companyId = _service.getCurrentCompanyId();
+      if (companyId == null || companyId.isEmpty) {
+        safePrint(
+          '⚠️ [AuthProvider] Company ID not cached, will be fetched on demand',
+        );
+      } else {
+        safePrint('✅ [AuthProvider] Company ID cached: $companyId');
+      }
     } else {
-      safePrint('ℹ️ [AuthProvider] No user found on initialization');
+      safePrint('⚠️ [AuthProvider] Session exists but user retrieval failed');
     }
     return user;
   }
@@ -32,9 +52,9 @@ class Auth extends _$Auth {
   Future<void> login(BuildContext context) async {
     // Prevent multiple simultaneous login attempts
     if (state.isLoading) return;
-    
+
     state = const AsyncValue.loading();
-    
+
     try {
       final result = await _service.login(
         email: emailController.text.trim(),
@@ -45,7 +65,7 @@ class Auth extends _$Auth {
       if (result.success) {
         // Wait for user to be available before updating state
         final user = await _service.getCurrentUser();
-        
+
         if (user != null) {
           // WhoAmI is already fetched and cached in AuthService.login()
           // via _fetchAndSaveWhoAmI(), so we don't need to fetch it again here
@@ -64,10 +84,10 @@ class Auth extends _$Auth {
               }
             }
           }
-          
+
           // Update auth state - this will trigger router rebuild and redirect
           state = AsyncValue.data(user);
-          
+
           // Small delay to ensure state is propagated before navigation
           // The router will handle navigation via redirect logic
           await Future.delayed(const Duration(milliseconds: 100));
@@ -84,10 +104,7 @@ class Auth extends _$Auth {
         );
       }
     } catch (e, stackTrace) {
-      state = AsyncValue.error(
-        e.toString(),
-        stackTrace,
-      );
+      state = AsyncValue.error(e.toString(), stackTrace);
     }
   }
 
@@ -123,9 +140,8 @@ class Auth extends _$Auth {
 
 @riverpod
 Future<WhoAmIModel?> whoAmI(WhoAmIRef ref) async {
-  final authService = AuthService();
   final authState = ref.watch(authProvider);
-  
+
   // Only fetch whoAmI if user is authenticated
   if (authState.hasValue && authState.value != null) {
     // For web, we need BuildContext - this is a simplified approach

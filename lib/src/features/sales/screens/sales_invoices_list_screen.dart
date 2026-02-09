@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
-import 'package:rise_flutter_exercise/src/features/sales/models/sales_invoice_model.dart';
 import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
 import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
 
@@ -10,10 +9,12 @@ class SalesInvoicesListScreen extends ConsumerStatefulWidget {
   const SalesInvoicesListScreen({super.key});
 
   @override
-  ConsumerState<SalesInvoicesListScreen> createState() => _SalesInvoicesListScreenState();
+  ConsumerState<SalesInvoicesListScreen> createState() =>
+      _SalesInvoicesListScreenState();
 }
 
-class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScreen> {
+class _SalesInvoicesListScreenState
+    extends ConsumerState<SalesInvoicesListScreen> {
   String? _companyId;
 
   @override
@@ -27,41 +28,57 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
   Future<void> _loadCompanyIdAndFetch() async {
     // Get company ID from WhoAmI service
     final authService = AuthService();
-    
+
     debugPrint('🔍 [SalesInvoicesList] Starting company ID retrieval...');
-    
+
     // First check cache (should be populated during login)
     _companyId = authService.getCurrentCompanyId();
     debugPrint('🔍 [SalesInvoicesList] Cached company ID: $_companyId');
-    
+
     // Always fetch fresh WhoAmI to ensure we have the latest data
     // This ensures we're using the correct company ID even if cache is stale
     debugPrint('🔍 [SalesInvoicesList] Fetching fresh WhoAmI data...');
     final whoAmIResponse = await authService.whoAmI(context);
-    
+
     if (whoAmIResponse.success && whoAmIResponse.data != null) {
       final extractedCompanyId = whoAmIResponse.data!.companyId;
       debugPrint('🔍 [SalesInvoicesList] WhoAmI fetch successful');
-      debugPrint('🔍 [SalesInvoicesList] Extracted company ID: $extractedCompanyId');
-      debugPrint('🔍 [SalesInvoicesList] Company ID length: ${extractedCompanyId?.length ?? 0}');
-      debugPrint('🔍 [SalesInvoicesList] Company ID type: ${extractedCompanyId.runtimeType}');
-      
+      debugPrint(
+        '🔍 [SalesInvoicesList] Extracted company ID: $extractedCompanyId',
+      );
+      debugPrint(
+        '🔍 [SalesInvoicesList] Company ID length: ${extractedCompanyId?.length ?? 0}',
+      );
+      debugPrint(
+        '🔍 [SalesInvoicesList] Company ID type: ${extractedCompanyId.runtimeType}',
+      );
+
       if (extractedCompanyId != null && extractedCompanyId.isNotEmpty) {
         _companyId = extractedCompanyId;
       } else {
-        debugPrint('❌ [SalesInvoicesList] Extracted company ID is null or empty');
+        debugPrint(
+          '❌ [SalesInvoicesList] Extracted company ID is null or empty',
+        );
         debugPrint('❌ [SalesInvoicesList] WhoAmI data: ${whoAmIResponse.data}');
-        debugPrint('❌ [SalesInvoicesList] Permissions: ${whoAmIResponse.data!.permissions}');
+        debugPrint(
+          '❌ [SalesInvoicesList] Permissions: ${whoAmIResponse.data!.permissions}',
+        );
       }
     } else {
       // Log the error for debugging
-      debugPrint('❌ [SalesInvoicesList] Failed to fetch WhoAmI: ${whoAmIResponse.message}');
-      debugPrint('❌ [SalesInvoicesList] WhoAmI response status: ${whoAmIResponse.statusCode}');
+      debugPrint(
+        '❌ [SalesInvoicesList] Failed to fetch WhoAmI: ${whoAmIResponse.message}',
+      );
+      debugPrint(
+        '❌ [SalesInvoicesList] WhoAmI response status: ${whoAmIResponse.statusCode}',
+      );
     }
-    
+
     // Validate company ID before making API call
     if (_companyId == null || _companyId!.isEmpty) {
-      debugPrint('❌ ERROR: Company ID is null or empty. Cannot fetch sales invoices.');
+      debugPrint(
+        '❌ ERROR: Company ID is null or empty. Cannot fetch sales invoices.',
+      );
       if (mounted) {
         // Don't use fallback - show proper error instead
         setState(() {
@@ -70,22 +87,22 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
       }
       return;
     }
-    
+
     debugPrint('✅ [SalesInvoicesList] Using company ID: $_companyId');
-    debugPrint('✅ [SalesInvoicesList] Company ID verification - Length: ${_companyId!.length}');
-    
+    debugPrint(
+      '✅ [SalesInvoicesList] Company ID verification - Length: ${_companyId!.length}',
+    );
+
     if (mounted) {
-      ref.read(salesInvoicesProvider.notifier).fetchSalesInvoices(
-        context,
-        _companyId!,
-      );
+      ref
+          .read(salesInvoicesProvider.notifier)
+          .fetchSalesInvoices(context, _companyId!);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final invoicesState = ref.watch(salesInvoicesProvider);
-    final authState = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -106,9 +123,7 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
       body: invoicesState.when(
         data: (invoices) {
           if (invoices.isEmpty) {
-            return const Center(
-              child: Text('No sales invoices found'),
-            );
+            return const Center(child: Text('No sales invoices found'));
           }
           return ListView.builder(
             itemCount: invoices.length,
@@ -174,9 +189,7 @@ class _SalesInvoicesListScreenState extends ConsumerState<SalesInvoicesListScree
             },
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

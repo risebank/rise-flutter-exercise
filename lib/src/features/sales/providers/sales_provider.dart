@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rise_flutter_exercise/src/features/sales/services/sales_service.dart';
 import 'package:rise_flutter_exercise/src/features/sales/models/sales_invoice_model.dart';
-import 'package:rise_flutter_exercise/src/features/auth/providers/auth_provider.dart';
 
 part 'sales_provider.g.dart';
 
@@ -17,21 +16,37 @@ class SalesInvoices extends _$SalesInvoices {
     return [];
   }
 
-  Future<void> fetchSalesInvoices(BuildContext context, String companyId) async {
+  Future<void> fetchSalesInvoices(
+    BuildContext context,
+    String companyId,
+  ) async {
     state = const AsyncValue.loading();
-    
+
     try {
+      debugPrint('🔄 [SalesProvider] Calling fetchSalesInvoices');
       final response = await _service.fetchSalesInvoices(context, companyId);
-      
+
+      debugPrint(
+        '📊 [SalesProvider] Response received - success: ${response.success}',
+      );
+      debugPrint('📊 [SalesProvider] Response message: ${response.message}');
+      debugPrint('📊 [SalesProvider] Has data: ${response.data != null}');
+
       if (response.success && response.data != null) {
+        debugPrint(
+          '✅ [SalesProvider] Setting state with ${response.data!.data.length} invoices',
+        );
         state = AsyncValue.data(response.data!.data);
       } else {
+        debugPrint('❌ [SalesProvider] Response failed: ${response.message}');
         state = AsyncValue.error(
           response.message ?? 'Failed to fetch sales invoices',
           StackTrace.current,
         );
       }
     } catch (e, stackTrace) {
+      debugPrint('❌ [SalesProvider] Exception: $e');
+      debugPrint('❌ [SalesProvider] Stack trace: $stackTrace');
       state = AsyncValue.error(e.toString(), stackTrace);
     }
   }
@@ -53,14 +68,14 @@ class SelectedSalesInvoice extends _$SelectedSalesInvoice {
     String invoiceId,
   ) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final response = await _service.fetchSalesInvoiceById(
         context,
         companyId,
         invoiceId,
       );
-      
+
       if (response.success && response.data != null) {
         state = AsyncValue.data(response.data);
       } else {
@@ -94,14 +109,14 @@ class SalesInvoiceCreator extends _$SalesInvoiceCreator {
     SalesInvoiceModel invoice,
   ) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final response = await _service.createSalesInvoice(
         context,
         companyId,
         invoice,
       );
-      
+
       if (response.success && response.data != null) {
         state = AsyncValue.data(response.data);
         return response.data;
@@ -139,7 +154,7 @@ class UpdateSalesInvoice extends _$UpdateSalesInvoice {
     SalesInvoiceModel invoice,
   ) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final response = await _service.updateSalesInvoice(
         context,
@@ -147,7 +162,7 @@ class UpdateSalesInvoice extends _$UpdateSalesInvoice {
         invoiceId,
         invoice,
       );
-      
+
       if (response.success && response.data != null) {
         state = AsyncValue.data(response.data);
         return response.data;

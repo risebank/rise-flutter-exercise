@@ -75,11 +75,7 @@ class RecipientModel {
   final String? name;
   final String? email;
 
-  const RecipientModel({
-    this.id,
-    this.name,
-    this.email,
-  });
+  const RecipientModel({this.id, this.name, this.email});
 
   factory RecipientModel.fromJson(Map<String, dynamic> json) =>
       _$RecipientModelFromJson(json);
@@ -173,10 +169,7 @@ class SalesInvoiceListResponseModel {
   final List<SalesInvoiceListItemModel> data;
   final Map<String, dynamic>? meta;
 
-  const SalesInvoiceListResponseModel({
-    required this.data,
-    this.meta,
-  });
+  const SalesInvoiceListResponseModel({required this.data, this.meta});
 
   factory SalesInvoiceListResponseModel.fromJson(Map<String, dynamic> json) =>
       _$SalesInvoiceListResponseModelFromJson(json);

@@ -17,26 +17,46 @@ class SalesService {
     int limit = 20,
   }) async {
     // Log the company ID being used
-    debugPrint('🔍 [SalesService] Fetching sales invoices with companyId: $companyId');
+    debugPrint(
+      '🔍 [SalesService] Fetching sales invoices with companyId: $companyId',
+    );
     debugPrint('🔍 [SalesService] Company ID length: ${companyId.length}');
     debugPrint('🔍 [SalesService] Company ID type: ${companyId.runtimeType}');
-    
-    final endpoint = Endpoints.salesInvoices.replaceAll('{company_id}', companyId);
+
+    final endpoint = Endpoints.salesInvoices.replaceAll(
+      '{company_id}',
+      companyId,
+    );
     debugPrint('🔍 [SalesService] Full endpoint URL: $endpoint');
-    
+
     final response = await _apiClient.get<Map<String, dynamic>>(
       endpoint,
-      queryParameters: {
-        'offset': offset,
-        'limit': limit,
-      },
+      queryParameters: {'offset': offset, 'limit': limit},
       context: context,
+    );
+
+    debugPrint(
+      '📥 [SalesService] Received API response - success: ${response.success}',
+    );
+    debugPrint('📥 [SalesService] Response message: ${response.message}');
+    debugPrint(
+      '📥 [SalesService] Response status code: ${response.statusCode}',
+    );
+    debugPrint(
+      '📥 [SalesService] Response data type: ${response.data?.runtimeType}',
     );
 
     return ApiResponse.fromApiClientResponse(
       context,
       response,
-      parser: (json) => SalesInvoiceListResponseModel.fromJson(json as Map<String, dynamic>),
+      parser: (json) {
+        debugPrint('🔄 [SalesService] Parsing response data');
+        debugPrint('🔄 [SalesService] JSON type: ${json.runtimeType}');
+        debugPrint('🔄 [SalesService] JSON: $json');
+        return SalesInvoiceListResponseModel.fromJson(
+          json as Map<String, dynamic>,
+        );
+      },
       errorMessage: ErrorMessages.fetchError(context, 'sales invoices'),
     );
   }
@@ -49,7 +69,7 @@ class SalesService {
     String invoiceId,
   ) async {
     final endpoint = Endpoints.salesInvoiceById(companyId, invoiceId);
-    
+
     final response = await _apiClient.get<Map<String, dynamic>>(
       endpoint,
       context: context,
@@ -58,7 +78,8 @@ class SalesService {
     return ApiResponse.fromApiClientResponse(
       context,
       response,
-      parser: (json) => SalesInvoiceModel.fromJson(json as Map<String, dynamic>),
+      parser: (json) =>
+          SalesInvoiceModel.fromJson(json as Map<String, dynamic>),
       errorMessage: ErrorMessages.fetchError(context, 'sales invoice'),
     );
   }
@@ -79,7 +100,7 @@ class SalesService {
     // 3. Data: invoice.toJson() (but exclude id, created_at, updated_at)
     // 4. Parse response using SalesInvoiceModel.fromJson
     // 5. Return ApiResponse with proper error handling
-    
+
     throw UnimplementedError(
       'createSalesInvoice is not yet implemented. '
       'This is Stage 1 of the exercise - please implement the POST endpoint.',
@@ -103,7 +124,7 @@ class SalesService {
     // 3. Data: invoice.toJson() (but exclude id, created_at, updated_at, journal_number, status)
     // 4. Parse response using SalesInvoiceModel.fromJson
     // 5. Return ApiResponse with proper error handling
-    
+
     throw UnimplementedError(
       'updateSalesInvoice is not yet implemented. '
       'This is Stage 2 of the exercise - please implement the PATCH endpoint.',

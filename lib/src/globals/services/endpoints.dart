@@ -8,7 +8,7 @@ class Endpoints {
 
   // Sales endpoints
   static const String salesInvoices = '/companies/{company_id}/sales-invoices';
-  
+
   static String salesInvoiceById(String companyId, String invoiceId) {
     return '/companies/$companyId/sales-invoices/$invoiceId';
   }

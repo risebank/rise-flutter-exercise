@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:rise_flutter_exercise/src/features/sales/providers/sales_provider.dart';
-import 'package:rise_flutter_exercise/src/features/sales/models/sales_invoice_model.dart';
 import 'package:rise_flutter_exercise/src/features/auth/services/auth_service.dart';
 
 class SalesInvoiceDetailScreen extends ConsumerStatefulWidget {
   final String invoiceId;
 
-  const SalesInvoiceDetailScreen({
-    super.key,
-    required this.invoiceId,
-  });
+  const SalesInvoiceDetailScreen({super.key, required this.invoiceId});
 
   @override
-  ConsumerState<SalesInvoiceDetailScreen> createState() => _SalesInvoiceDetailScreenState();
+  ConsumerState<SalesInvoiceDetailScreen> createState() =>
+      _SalesInvoiceDetailScreenState();
 }
 
-class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScreen> {
+class _SalesInvoiceDetailScreenState
+    extends ConsumerState<SalesInvoiceDetailScreen> {
   String? _companyId;
 
   @override
@@ -31,28 +28,26 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
   Future<void> _loadCompanyIdAndFetch() async {
     // Get company ID from WhoAmI service
     final authService = AuthService();
-    
+
     // Always fetch WhoAmI to ensure we have the latest data
     // The cache might not be populated yet if login just completed
     final whoAmIResponse = await authService.whoAmI(context);
-    
+
     if (whoAmIResponse.success && whoAmIResponse.data != null) {
       _companyId = whoAmIResponse.data!.companyId;
     } else {
       // If WhoAmI fails, try cache as fallback
       _companyId = authService.getCurrentCompanyId();
     }
-    
+
     // Fallback to instructions value if still null (for exercise setup)
     // This should only happen if WhoAmI endpoint fails and cache is empty
     _companyId ??= 'company-123'; // From INSTRUCTIONS.md
-    
+
     if (_companyId != null && _companyId!.isNotEmpty && mounted) {
-      ref.read(selectedSalesInvoiceProvider.notifier).fetchSalesInvoice(
-        context,
-        _companyId!,
-        widget.invoiceId,
-      );
+      ref
+          .read(selectedSalesInvoiceProvider.notifier)
+          .fetchSalesInvoice(context, _companyId!, widget.invoiceId);
     } else if (mounted) {
       // Show error if we couldn't get company ID
       setState(() {
@@ -88,73 +83,74 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
       body: invoiceState.when(
         data: (invoice) {
           if (invoice == null) {
-            return const Center(
-              child: Text('Invoice not found'),
-            );
+            return const Center(child: Text('Invoice not found'));
           }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSection(
-                  'Invoice Information',
-                  [
-                    _buildInfoRow('ID', invoice.id ?? 'N/A'),
-                    _buildInfoRow('Status', invoice.status ?? 'N/A'),
-                    _buildInfoRow('Invoice Date', invoice.invoiceDate ?? 'N/A'),
-                    _buildInfoRow('Due Date', invoice.dueDate ?? 'N/A'),
-                    _buildInfoRow('Document Date', invoice.documentDate ?? 'N/A'),
-                    if (invoice.journalNumber != null)
-                      _buildInfoRow('Journal Number', invoice.journalNumber.toString()),
-                  ],
-                ),
+                _buildSection('Invoice Information', [
+                  _buildInfoRow('ID', invoice.id ?? 'N/A'),
+                  _buildInfoRow('Status', invoice.status ?? 'N/A'),
+                  _buildInfoRow('Invoice Date', invoice.invoiceDate ?? 'N/A'),
+                  _buildInfoRow('Due Date', invoice.dueDate ?? 'N/A'),
+                  _buildInfoRow('Document Date', invoice.documentDate ?? 'N/A'),
+                  if (invoice.journalNumber != null)
+                    _buildInfoRow(
+                      'Journal Number',
+                      invoice.journalNumber.toString(),
+                    ),
+                ]),
                 const SizedBox(height: 24),
-                _buildSection(
-                  'Description',
-                  [
-                    Text(invoice.description ?? 'No description'),
-                  ],
-                ),
+                _buildSection('Description', [
+                  Text(invoice.description ?? 'No description'),
+                ]),
                 const SizedBox(height: 24),
                 if (invoice.recipient != null)
-                  _buildSection(
-                    'Recipient',
-                    [
-                      _buildInfoRow('Name', invoice.recipient!.name ?? 'N/A'),
-                      _buildInfoRow('Email', invoice.recipient!.email ?? 'N/A'),
-                    ],
-                  ),
+                  _buildSection('Recipient', [
+                    _buildInfoRow('Name', invoice.recipient!.name ?? 'N/A'),
+                    _buildInfoRow('Email', invoice.recipient!.email ?? 'N/A'),
+                  ]),
                 if (invoice.recipientInvoicingEmail != null) ...[
                   const SizedBox(height: 24),
-                  _buildSection(
-                    'Invoicing Email',
-                    [
-                      Text(invoice.recipientInvoicingEmail!),
-                    ],
-                  ),
+                  _buildSection('Invoicing Email', [
+                    Text(invoice.recipientInvoicingEmail!),
+                  ]),
                 ],
                 if (invoice.recipientInvoicingAddress != null) ...[
                   const SizedBox(height: 24),
-                  _buildSection(
-                    'Invoicing Address',
-                    [
-                      _buildInfoRow('Street', invoice.recipientInvoicingAddress!.street ?? 'N/A'),
-                      _buildInfoRow('City', invoice.recipientInvoicingAddress!.city ?? 'N/A'),
-                      _buildInfoRow('Postal Code', invoice.recipientInvoicingAddress!.postalCode ?? 'N/A'),
-                      _buildInfoRow('Region', invoice.recipientInvoicingAddress!.region ?? 'N/A'),
-                      _buildInfoRow('Country', invoice.recipientInvoicingAddress!.countryCode ?? 'N/A'),
-                    ],
-                  ),
+                  _buildSection('Invoicing Address', [
+                    _buildInfoRow(
+                      'Street',
+                      invoice.recipientInvoicingAddress!.street ?? 'N/A',
+                    ),
+                    _buildInfoRow(
+                      'City',
+                      invoice.recipientInvoicingAddress!.city ?? 'N/A',
+                    ),
+                    _buildInfoRow(
+                      'Postal Code',
+                      invoice.recipientInvoicingAddress!.postalCode ?? 'N/A',
+                    ),
+                    _buildInfoRow(
+                      'Region',
+                      invoice.recipientInvoicingAddress!.region ?? 'N/A',
+                    ),
+                    _buildInfoRow(
+                      'Country',
+                      invoice.recipientInvoicingAddress!.countryCode ?? 'N/A',
+                    ),
+                  ]),
                 ],
                 const SizedBox(height: 24),
-                _buildSection(
-                  'References',
-                  [
-                    _buildInfoRow('Our Reference', invoice.ourReference ?? 'N/A'),
-                    _buildInfoRow('Your Reference', invoice.yourReference ?? 'N/A'),
-                  ],
-                ),
+                _buildSection('References', [
+                  _buildInfoRow('Our Reference', invoice.ourReference ?? 'N/A'),
+                  _buildInfoRow(
+                    'Your Reference',
+                    invoice.yourReference ?? 'N/A',
+                  ),
+                ]),
                 const SizedBox(height: 24),
                 _buildSection(
                   'Invoice Lines',
@@ -171,11 +167,14 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
                                   if (line.description != null)
                                     Text(
                                       line.description!,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   const SizedBox(height: 8),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       if (line.quantity != null)
                                         Text('Qty: ${line.quantity}'),
@@ -184,7 +183,9 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
                                       if (line.amount != null)
                                         Text(
                                           'Amount: €${line.amount}',
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                     ],
                                   ),
@@ -200,44 +201,42 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
                         }).toList(),
                 ),
                 const SizedBox(height: 24),
-                _buildSection(
-                  'Totals',
-                  [
-                    if (invoice.grossAmount != null)
-                      _buildInfoRow(
-                        'Gross Amount',
-                        '€${invoice.grossAmount}',
-                        isBold: true,
-                      ),
-                    if (invoice.vatAmount != null)
-                      _buildInfoRow(
-                        'VAT Amount',
-                        '€${invoice.vatAmount}',
-                        isBold: true,
-                      ),
-                  ],
-                ),
+                _buildSection('Totals', [
+                  if (invoice.grossAmount != null)
+                    _buildInfoRow(
+                      'Gross Amount',
+                      '€${invoice.grossAmount}',
+                      isBold: true,
+                    ),
+                  if (invoice.vatAmount != null)
+                    _buildInfoRow(
+                      'VAT Amount',
+                      '€${invoice.vatAmount}',
+                      isBold: true,
+                    ),
+                ]),
                 const SizedBox(height: 24),
-                _buildSection(
-                  'Metadata',
-                  [
-                    _buildInfoRow('Currency', invoice.currency ?? 'N/A'),
-                    _buildInfoRow('Invoicing Channel', invoice.invoicingChannel ?? 'N/A'),
-                    if (invoice.paymentTerm != null)
-                      _buildInfoRow('Payment Term', '${invoice.paymentTerm} days'),
-                    if (invoice.createdAt != null)
-                      _buildInfoRow('Created At', invoice.createdAt!),
-                    if (invoice.updatedAt != null)
-                      _buildInfoRow('Updated At', invoice.updatedAt!),
-                  ],
-                ),
+                _buildSection('Metadata', [
+                  _buildInfoRow('Currency', invoice.currency ?? 'N/A'),
+                  _buildInfoRow(
+                    'Invoicing Channel',
+                    invoice.invoicingChannel ?? 'N/A',
+                  ),
+                  if (invoice.paymentTerm != null)
+                    _buildInfoRow(
+                      'Payment Term',
+                      '${invoice.paymentTerm} days',
+                    ),
+                  if (invoice.createdAt != null)
+                    _buildInfoRow('Created At', invoice.createdAt!),
+                  if (invoice.updatedAt != null)
+                    _buildInfoRow('Updated At', invoice.updatedAt!),
+                ]),
               ],
             ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -267,10 +266,7 @@ class _SalesInvoiceDetailScreenState extends ConsumerState<SalesInvoiceDetailScr
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         ...children,

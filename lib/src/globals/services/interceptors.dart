@@ -9,30 +9,63 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
+      // Check if user is signed in
       final session = await Amplify.Auth.fetchAuthSession();
 
+      safePrint(
+        '🔍 [AuthInterceptor] Session check - isSignedIn: ${session.isSignedIn}',
+      );
+
       if (session.isSignedIn) {
-        final tokens = await Amplify.Auth.fetchAuthSession(
-              options: FetchAuthSessionOptions(forceRefresh: false),
-            ) as CognitoAuthSession;
-        final token = tokens.userPoolTokensResult.value.accessToken.raw;
+        // Fetch tokens with proper type casting
+        final cognitoSession =
+            await Amplify.Auth.fetchAuthSession(
+                  options: FetchAuthSessionOptions(forceRefresh: false),
+                )
+                as CognitoAuthSession;
+
+        final tokens = cognitoSession.userPoolTokensResult.value;
+        final token = tokens.accessToken.raw;
+
+        safePrint(
+          '✅ [AuthInterceptor] Token attached to request: ${options.path}',
+        );
         options.headers['Authorization'] = 'Bearer $token';
+      } else {
+        safePrint(
+          '⚠️ [AuthInterceptor] User not signed in, skipping token attachment',
+        );
       }
     } catch (e) {
-      // Log error but continue with request
+      safePrint('❌ [AuthInterceptor] Error attaching token: $e');
+      // Log error but continue with request - let API handle auth errors
     }
     return handler.next(options);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
+    safePrint(
+      '❌ [AuthInterceptor] Error: ${err.response?.statusCode} - ${err.requestOptions.path}',
+    );
+
+    if (err.response?.statusCode == 401 || err.response?.statusCode == 403) {
+      safePrint(
+        '🔄 [AuthInterceptor] Attempting token refresh for 401/403 error',
+      );
+
       // Token might be expired, try to refresh
       try {
-        final refreshedTokens = await Amplify.Auth.fetchAuthSession(
-              options: FetchAuthSessionOptions(forceRefresh: true),
-            ) as CognitoAuthSession;
-        final newToken = refreshedTokens.userPoolTokensResult.value.accessToken.raw;
+        final refreshedSession =
+            await Amplify.Auth.fetchAuthSession(
+                  options: FetchAuthSessionOptions(forceRefresh: true),
+                )
+                as CognitoAuthSession;
+
+        final tokens = refreshedSession.userPoolTokensResult.value;
+        final newToken = tokens.accessToken.raw;
+
+        safePrint('✅ [AuthInterceptor] Token refreshed, retrying request');
 
         // Update the original request with new token
         err.requestOptions.headers['Authorization'] = 'Bearer $newToken';
@@ -44,9 +77,14 @@ class AuthInterceptor extends Interceptor {
         dio.options.receiveTimeout = err.requestOptions.receiveTimeout;
         dio.options.headers = err.requestOptions.headers;
 
+        // Add interceptors to the retry dio instance
+        dio.interceptors.addAll([AuthInterceptor(), ErrorInterceptor()]);
+
         final response = await dio.fetch(err.requestOptions);
+        safePrint('✅ [AuthInterceptor] Retry successful');
         return handler.resolve(response);
       } catch (refreshError) {
+        safePrint('❌ [AuthInterceptor] Token refresh failed: $refreshError');
         // If refresh fails, continue with error
         return handler.next(err);
       }
@@ -57,7 +95,55 @@ class AuthInterceptor extends Interceptor {
 
 class ErrorInterceptor extends Interceptor {
   @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    safePrint('📤 [ErrorInterceptor] Request initiated');
+    safePrint('📤 [ErrorInterceptor] Method: ${options.method}');
+    safePrint('📤 [ErrorInterceptor] Path: ${options.path}');
+    safePrint('📤 [ErrorInterceptor] Full URL: ${options.uri}');
+    return handler.next(options);
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    safePrint('✅ [ErrorInterceptor] Response received');
+    safePrint('✅ [ErrorInterceptor] Status: ${response.statusCode}');
+    safePrint('✅ [ErrorInterceptor] Path: ${response.requestOptions.path}');
+    
+    // Check for CORS headers
+    final corsHeader = response.headers.value('access-control-allow-origin');
+    safePrint('✅ [ErrorInterceptor] CORS header: $corsHeader');
+    
+    try {
+      safePrint('✅ [ErrorInterceptor] Data type: ${response.data.runtimeType}');
+      if (response.data == null) {
+        safePrint('⚠️ [ErrorInterceptor] Response data is null - possible CORS issue');
+      }
+    } catch (e) {
+      safePrint('❌ [ErrorInterceptor] Error accessing response data: $e');
+      safePrint('⚠️ [ErrorInterceptor] This may indicate a CORS issue');
+    }
+    
+    return handler.next(response);
+  }
+
+  @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    safePrint('❌ [ErrorInterceptor] Request failed');
+    safePrint('❌ [ErrorInterceptor] Path: ${err.requestOptions.path}');
+    safePrint('❌ [ErrorInterceptor] Method: ${err.requestOptions.method}');
+    safePrint('❌ [ErrorInterceptor] Status Code: ${err.response?.statusCode}');
+    safePrint('❌ [ErrorInterceptor] Error Type: ${err.type}');
+    safePrint('❌ [ErrorInterceptor] Error Message: ${err.message}');
+
+    if (err.response != null) {
+      safePrint('❌ [ErrorInterceptor] Response Data: ${err.response!.data}');
+      safePrint(
+        '❌ [ErrorInterceptor] Response Headers: ${err.response!.headers}',
+      );
+    } else {
+      safePrint('❌ [ErrorInterceptor] No response received (network error?)');
+    }
+
     return handler.next(err);
   }
 }

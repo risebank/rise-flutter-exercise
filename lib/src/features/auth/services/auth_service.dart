@@ -45,11 +45,11 @@ class AuthService {
   Future<ApiResponse<SignOutResult>> logout(BuildContext context) async {
     try {
       final result = await Amplify.Auth.signOut();
-      
+
       // Clear cached WhoAmI data on logout
       _cachedWhoAmI = null;
       safePrint('WhoAmI cache cleared on logout');
-      
+
       return ApiResponse.success(result);
     } catch (e) {
       final errorMessage = _parseAmplifyError(context, e);
@@ -87,7 +87,9 @@ class AuthService {
 
     // Check cache first - if we have valid cached data, return it
     if (_cachedWhoAmI != null && _cachedWhoAmI!.companyId != null) {
-      safePrint('Using cached WhoAmI data. Company ID: ${_cachedWhoAmI!.companyId}');
+      safePrint(
+        'Using cached WhoAmI data. Company ID: ${_cachedWhoAmI!.companyId}',
+      );
       return ApiResponse.success(_cachedWhoAmI!);
     }
 
@@ -98,7 +100,7 @@ class AuthService {
         Endpoints.whoami,
         context: context,
       );
-      
+
       // Check if API call was successful
       if (!response.success) {
         safePrint('WhoAmI API call failed: ${response.message}');
@@ -107,7 +109,7 @@ class AuthService {
           statusCode: response.statusCode,
         );
       }
-      
+
       // Parse the response data directly (backend returns data, not wrapped)
       if (response.data == null) {
         safePrint('WhoAmI API returned null data');
@@ -116,17 +118,19 @@ class AuthService {
           statusCode: response.statusCode,
         );
       }
-      
-      safePrint('WhoAmI API response received. Data keys: ${response.data!.keys}');
-      
+
+      safePrint(
+        'WhoAmI API response received. Data keys: ${response.data!.keys}',
+      );
+
       try {
         // Parse WhoAmI model from the response data
         // The API returns: { user: {...}, permissions: [...] }
         safePrint('Parsing WhoAmI response...');
         safePrint('Response data structure: ${response.data!.keys}');
-        
+
         final whoAmI = WhoAmIModel.fromJson(response.data!);
-        
+
         // Validate that we have permissions with company IDs
         if (whoAmI.permissions.isEmpty) {
           safePrint('WARNING: WhoAmI response has no permissions');
@@ -136,12 +140,14 @@ class AuthService {
             statusCode: response.statusCode,
           );
         }
-        
+
         final companyId = whoAmI.companyId;
         safePrint('🔍 [AuthService] Extracted companyId: $companyId');
         safePrint('🔍 [AuthService] CompanyId type: ${companyId.runtimeType}');
-        safePrint('🔍 [AuthService] CompanyId length: ${companyId?.length ?? 0}');
-        
+        safePrint(
+          '🔍 [AuthService] CompanyId length: ${companyId?.length ?? 0}',
+        );
+
         if (companyId == null || companyId.isEmpty) {
           safePrint('❌ WARNING: Could not extract company ID from WhoAmI');
           safePrint('Permissions: ${whoAmI.permissions}');
@@ -149,21 +155,29 @@ class AuthService {
             final firstPerm = whoAmI.permissions.first;
             safePrint('First permission: ${firstPerm.toJson()}');
             safePrint('First permission companyId: ${firstPerm.companyId}');
-            safePrint('First permission companyId type: ${firstPerm.companyId.runtimeType}');
-            safePrint('First permission companyId length: ${firstPerm.companyId.length}');
+            safePrint(
+              'First permission companyId type: ${firstPerm.companyId.runtimeType}',
+            );
+            safePrint(
+              'First permission companyId length: ${firstPerm.companyId.length}',
+            );
           }
           return ApiResponse.error(
             'Could not determine company ID',
             statusCode: response.statusCode,
           );
         }
-        
+
         // Cache the WhoAmI data for future use
         _cachedWhoAmI = whoAmI;
         safePrint('✅ WhoAmI cached successfully. Company ID: $companyId');
-        safePrint('✅ Company ID verification - Length: ${companyId.length}, Value: $companyId');
-        safePrint('User: ${whoAmI.user.email}, Permissions count: ${whoAmI.permissions.length}');
-        
+        safePrint(
+          '✅ Company ID verification - Length: ${companyId.length}, Value: $companyId',
+        );
+        safePrint(
+          'User: ${whoAmI.user.email}, Permissions count: ${whoAmI.permissions.length}',
+        );
+
         return ApiResponse.success(whoAmI, statusCode: response.statusCode);
       } catch (e, stackTrace) {
         safePrint('Failed to parse WhoAmI response: $e');
@@ -178,9 +192,7 @@ class AuthService {
     } catch (e, stackTrace) {
       safePrint('WhoAmI request failed: $e');
       safePrint('Stack trace: $stackTrace');
-      return ApiResponse.error(
-        ErrorMessages.fetchError(context, 'user info'),
-      );
+      return ApiResponse.error(ErrorMessages.fetchError(context, 'user info'));
     }
   }
 
@@ -191,7 +203,9 @@ class AuthService {
         // Store user info - for exercise, we'll use a simple in-memory cache
         // In production app, this would use Hive or shared preferences
         _cachedWhoAmI = whoAmIResponse.data;
-        safePrint('WhoAmI data cached successfully. Company ID: ${_cachedWhoAmI?.companyId}');
+        safePrint(
+          'WhoAmI data cached successfully. Company ID: ${_cachedWhoAmI?.companyId}',
+        );
       } else {
         safePrint('Failed to fetch WhoAmI: ${whoAmIResponse.message}');
       }

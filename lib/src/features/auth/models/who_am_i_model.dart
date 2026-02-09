@@ -7,10 +7,7 @@ class WhoAmIModel {
   final UserModel user;
   final List<PermissionModel> permissions;
 
-  const WhoAmIModel({
-    required this.user,
-    required this.permissions,
-  });
+  const WhoAmIModel({required this.user, required this.permissions});
 
   factory WhoAmIModel.fromJson(Map<String, dynamic> json) =>
       _$WhoAmIModelFromJson(json);
@@ -32,11 +29,7 @@ class UserModel {
   final String email;
   final String? name;
 
-  const UserModel({
-    required this.id,
-    required this.email,
-    this.name,
-  });
+  const UserModel({required this.id, required this.email, this.name});
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
@@ -52,11 +45,7 @@ class PermissionModel {
   final String? companyName;
   final String? role;
 
-  const PermissionModel({
-    required this.companyId,
-    this.companyName,
-    this.role,
-  });
+  const PermissionModel({required this.companyId, this.companyName, this.role});
 
   factory PermissionModel.fromJson(Map<String, dynamic> json) =>
       _$PermissionModelFromJson(json);

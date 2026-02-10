@@ -1,0 +1,156 @@
+name: CI - Pull Request Checks
+
+on:
+  pull_request:
+    branches: ['main', 'develop']
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: ['main', 'develop']
+  merge_group:
+    branches: ['main', 'develop']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  # Job 1: Code Quality Checks (Lint) - Runs in parallel
+  lint:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'dev' }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+      COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION || 'eu-central-1' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          version: '3.38.3'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get
+
+      - name: Generate code (if needed)
+        run: |
+          set -euo pipefail
+          if [ -f "pubspec.yaml" ] && grep -q "build_runner" pubspec.yaml; then
+            echo "🔨 Generating code (Riverpod providers, Hive adapters)..."
+            dart run build_runner build --delete-conflicting-outputs
+            echo "✅ Code generation completed"
+          else
+            echo "⏭️  Skipping code generation (build_runner not configured)"
+          fi
+
+      - name: Analyze code
+        run: |
+          set -euo pipefail
+          echo "🔍 Running Flutter analyzer..."
+          if ! flutter analyze; then
+            echo ""
+            echo "❌ Code analysis failed. Fix the errors and warnings above (see analysis_options.yaml for rules)."
+            exit 1
+          fi
+          echo "✅ Code analysis completed without errors"
+
+  # Job 2: Format Check - Runs in parallel
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'dev' }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+      COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION || 'eu-central-1' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          version: '3.38.3'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get
+
+      - name: Check code formatting
+        run: |
+          set -euo pipefail
+          echo "🎨 Checking code formatting..."
+          if ! dart format --set-exit-if-changed .; then
+            echo ""
+            echo "❌ Code is not properly formatted!"
+            echo ""
+            echo "To fix this, run:"
+            echo "  dart format ."
+            echo ""
+            echo "Then commit the formatted files."
+            exit 1
+          fi
+          echo "✅ Code formatting check passed"
+
+  # Job 3: Tests - Runs in parallel
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'dev' }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+      COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION || 'eu-central-1' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          version: '3.38.3'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get
+
+      - name: Generate code (if needed)
+        run: |
+          set -euo pipefail
+          if [ -f "pubspec.yaml" ] && grep -q "build_runner" pubspec.yaml; then
+            echo "🔨 Generating code (Riverpod providers, Hive adapters)..."
+            dart run build_runner build --delete-conflicting-outputs
+            echo "✅ Code generation completed"
+          else
+            echo "⏭️  Skipping code generation (build_runner not configured)"
+          fi
+
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          echo "🧪 Running tests..."
+          flutter test
+          echo "✅ All tests passed"

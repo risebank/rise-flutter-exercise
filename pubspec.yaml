@@ -1,0 +1,54 @@
+name: rise_flutter_exercise
+description: "A Flutter exercise repository for live-coding sessions."
+publish_to: 'none' # This is an exercise repository, not for publishing
+
+version: 0.0.1+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  
+  # State Management
+  flutter_riverpod: ^2.6.1
+  flutter_hooks: ^0.21.2
+  hooks_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  
+  # Backend/API & Auth
+  amplify_flutter: ^2.7.0
+  amplify_api: ^2.7.0
+  amplify_auth_cognito: ^2.7.0
+  dio: ^5.4.0
+  
+  # Navigation
+  go_router: ^15.0.0
+  
+  # JSON Serialization
+  json_annotation: ^4.9.0
+  
+  # Internationalization
+  intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
+  
+  # Theme & Styling
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  
+  # Code Generation
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.6.5
+  json_serializable: ^6.8.0
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
